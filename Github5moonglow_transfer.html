@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moonglow — Stock Transfer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: #F5F0E8; color: #1A1A2E; min-height: 100vh; padding: 20px 16px 40px; }
+  .container { max-width: 600px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .header h1 { font-size: 20px; font-weight: 600; }
+  .date-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #E2D5B8; color: #5A4A2A; }
+  .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #27AE60; margin-right: 5px; }
+  .live-label { font-size: 12px; color: #666; margin-left: auto; }
+  .card { background: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .card-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  .row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .04em; }
+  .arrow { padding-top: 22px; font-size: 18px; color: #ccc; flex-shrink: 0; }
+  select, input[type=text], input[type=number] { width: 100%; padding: 9px 12px; border: 1px solid #E0D8CC; border-radius: 10px; background: #FDFBF8; color: #1A1A2E; font-size: 13px; font-family: inherit; appearance: none; -webkit-appearance: none; }
+  select:focus, input:focus { outline: none; border-color: #E2B96B; }
+  .search-wrap { position: relative; margin-bottom: 10px; }
+  .search-wrap input { padding-left: 36px; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; pointer-events: none; }
+  .dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #E0D8CC; border-radius: 12px; max-height: 260px; overflow-y: auto; z-index: 200; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+  .dropdown.open { display: block; }
+  .dd-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #F5F0E8; }
+  .dd-item:last-child { border-bottom: none; }
+  .dd-item:hover { background: #FBF7F0; }
+  .dd-name { font-size: 13px; font-weight: 500; }
+  .dd-sku { font-size: 11px; color: #999; margin-top: 2px; }
+  .dd-stock { display: flex; gap: 6px; margin-top: 4px; }
+  .chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .chip-from { background: #FFF3E0; color: #E65100; }
+  .chip-to   { background: #E8F5E9; color: #2E7D32; }
+  .chip-zero { background: #FDECEA; color: #C0392B; }
+  .items-list { margin-top: 4px; }
+  .item-row { display: grid; grid-template-columns: 1fr 70px 40px; align-items: start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #F5F0E8; }
+  .item-row:last-child { border-bottom: none; }
+  .item-info { min-width: 0; }
+  .item-name { font-size: 13px; font-weight: 500; line-height: 1.4; }
+  .item-meta { font-size: 11px; color: #999; margin-top: 2px; }
+  .item-chips { display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+  .item-qty { width: 100%; text-align: center; }
+  .remove-btn { background: none; border: 1px solid #FFCDD2; border-radius: 8px; color: #E53935; padding: 5px 7px; cursor: pointer; font-size: 13px; width: 100%; }
+  .empty-msg { text-align: center; color: #bbb; font-size: 13px; padding: 16px 0; }
+  .stock-status { font-size: 12px; color: #999; margin-top: 8px; font-style: italic; }
+  .btn-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .btn { padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-clear { background: #EEE8DE; color: #666; flex-shrink: 0; }
+  .btn-submit { background: #1A1A2E; color: #E2B96B; flex: 1; font-size: 15px; }
+  .banner { border-radius: 12px; padding: 12px 16px; font-size: 13px; margin-bottom: 14px; display: none; line-height: 1.5; }
+  .banner-success { background: #EAF6F0; color: #1A7A4A; border: 1px solid #A8DEC4; }
+  .banner-error   { background: #FDECEA; color: #C0392B; border: 1px solid #F5A9A3; }
+  .banner-warning { background: #FFF8E7; color: #B8860B; border: 1px solid #F5D78A; }
+  .pending-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .pending-count { background: #FFF8E7; color: #B8860B; border: 1px solid #F5D78A; border-radius: 20px; padding: 2px 8px; font-size: 11px; }
+  .refresh-btn { background: none; border: 1px solid #E0D8CC; border-radius: 8px; padding: 4px 10px; font-size: 12px; color: #888; cursor: pointer; }
+  .pending-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border: 2px solid #F5D78A; }
+  .pending-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pending-route { font-size: 14px; font-weight: 600; }
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .badge-who { background: #EAF2FB; color: #1A5A9A; }
+  .badge-note { background: #F5F0E8; color: #7A6A4A; }
+  .pending-meta { font-size: 11px; color: #999; }
+  .pending-items { margin-bottom: 12px; }
+  .pending-item { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 3px 0; border-bottom: 1px solid #F5F0E8; }
+  .pending-item:last-child { border-bottom: none; }
+  .pending-item-qty { font-weight: 600; color: #1A1A2E; }
+
+  .pending-empty { text-align: center; color: #bbb; font-size: 13px; padding: 12px 0; }
+  .log-section { margin-top: 8px; }
+  .log-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .log-entry { background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+  .log-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .log-route { font-size: 14px; font-weight: 600; }
+  .badge-saved { background: #EAF6F0; color: #1A7A4A; margin-left: auto; }
+  .log-time { font-size: 11px; color: #bbb; }
+  .log-item { display: flex; justify-content: space-between; font-size: 12px; color: #888; padding: 2px 0; }
+  .log-item-qty { font-weight: 600; color: #1A1A2E; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #E2B96B; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Stock transfer</h1>
+    <span class="date-chip" id="today-chip"></span>
+    <span class="live-label"><span class="live-dot"></span>Writes to Google Sheet</span>
+  </div>
+
+  <div id="banner-success" class="banner banner-success"></div>
+  <div id="banner-error"   class="banner banner-error"></div>
+  <div id="banner-warning" class="banner banner-warning"></div>
+
+  <div class="card">
+    <div class="card-title">Transfer Details</div>
+    <div class="row">
+      <div class="field">
+        <label>From</label>
+        <select id="sel-from" onchange="onLocationChange()">
+          <option value="">Select location...</option>
+          <option>Cairns</option><option>Eumundi</option><option>Fremantle</option>
+          <option>Melbourne</option><option>Moonglow HQ</option><option>Travel</option>
+        </select>
+      </div>
+      <div class="arrow">&#x2192;</div>
+      <div class="field">
+        <label>To</label>
+        <select id="sel-to" onchange="onLocationChange()">
+          <option value="">Select location...</option>
+          <option>Cairns</option><option>Eumundi</option><option>Fremantle</option>
+          <option>Melbourne</option><option>Moonglow HQ</option><option>Travel</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Transferred by</label>
+        <select id="sel-who">
+          <option value="">Select person...</option>
+          <option>Treva</option><option>Madi</option><option>Charlotte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <input type="text" id="inp-notes" placeholder="e.g. Market restock">
+      </div>
+    </div>
+    <div class="stock-status" id="stock-status"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add Products</div>
+    <div class="search-wrap">
+      <span class="search-icon">&#x1F50D;</span>
+      <input type="text" id="inp-search" placeholder="Loading products..." autocomplete="off" id="inp-search">
+      <div class="dropdown" id="dd"></div>
+    </div>
+    <div class="items-list" id="items-list">
+      <div class="empty-msg">No items added yet</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+    <button class="btn btn-submit" id="submit-btn" onclick="submitTransfer()">Log transfer &#x2192; Google Sheet</button>
+  </div>
+
+  <div style="margin-bottom:14px">
+    <div class="pending-title">
+      Pending Transfers
+      <span class="pending-count" id="pending-count">0</span>
+      <button class="refresh-btn" onclick="loadPending()">&#x21BB; Refresh</button>
+    </div>
+    <div id="pending-list"><div class="pending-empty">No pending transfers</div></div>
+  </div>
+
+  <div class="log-section" id="log-section" style="display:none">
+    <div class="log-title">Logged this session</div>
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec";
+
+// State
+var allProducts = [];  // [{name:'...', sku:'...'}]
+var items = [];        // [{name:'...', sku:'...', qty:1}]
+var logs = [];
+var fromStock = {};
+var toStock = {};
+
+document.getElementById('today-chip').textContent = new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+// ── Load products ─────────────────────────────────────────────────
+fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getProducts'})))
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if (d && d.products) {
+      allProducts = d.products; // [{name, sku}]
+      document.getElementById('inp-search').placeholder = 'Search by name or SKU... (' + allProducts.length + ' products)';
+    }
+  })
+  .catch(function(){
+    document.getElementById('inp-search').placeholder = 'Search by name or SKU...';
+  });
+
+// ── Load stock for locations ──────────────────────────────────────
+function onLocationChange() {
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+  fromStock = {}; toStock = {};
+  if (!from && !to) return;
+
+  var status = document.getElementById('stock-status');
+  status.textContent = 'Loading stock levels...';
+
+  var promises = [];
+  if (from) promises.push(
+    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:from})))
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.stock) fromStock=d.stock;})
+  );
+  if (to) promises.push(
+    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:to})))
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.stock) toStock=d.stock;})
+  );
+
+  Promise.all(promises).then(function(){
+    var parts = [];
+    if (from) parts.push(from + ': ' + Object.keys(fromStock).length + ' products');
+    if (to)   parts.push(to   + ': ' + Object.keys(toStock).length  + ' products');
+    status.textContent = '\u2713 ' + parts.join(' | ');
+    renderItems();
+  });
+}
+
+// ── Search ────────────────────────────────────────────────────────
+var inpSearch = document.getElementById('inp-search');
+var ddEl = document.getElementById('dd');
+
+inpSearch.addEventListener('input', function(){
+  var q = this.value.toLowerCase().trim();
+  if (q.length < 2) { ddEl.classList.remove('open'); return; }
+
+  var results = allProducts.filter(function(p){
+    return (p.name||'').toLowerCase().indexOf(q) >= 0 ||
+           (p.sku||'').toLowerCase().indexOf(q)  >= 0;
+  }).slice(0, 40);
+
+  if (!results.length) { ddEl.classList.remove('open'); return; }
+
+  ddEl.innerHTML = '';
+  results.forEach(function(product){
+    var already = items.some(function(x){ return x.name === product.name; });
+    var div = document.createElement('div');
+    div.className = 'dd-item';
+    if (already) div.style.opacity = '0.5';
+
+    var nameDiv = document.createElement('div');
+    nameDiv.className = 'dd-name';
+    nameDiv.textContent = product.name + (already ? ' (added)' : '');
+    div.appendChild(nameDiv);
+
+    if (product.sku) {
+      var skuDiv = document.createElement('div');
+      skuDiv.className = 'dd-sku';
+      skuDiv.textContent = product.sku;
+      div.appendChild(skuDiv);
+    }
+
+    // Stock chips
+    var from = document.getElementById('sel-from').value;
+    var to   = document.getElementById('sel-to').value;
+    if ((from && Object.keys(fromStock).length) || (to && Object.keys(toStock).length)) {
+      var chipsDiv = document.createElement('div');
+      chipsDiv.className = 'dd-stock';
+      if (from && Object.keys(fromStock).length) {
+        var qty = fromStock[product.name];
+        var chip = document.createElement('span');
+        chip.className = 'chip ' + ((!qty || qty<=0) ? 'chip-zero' : 'chip-from');
+        chip.textContent = from + ': ' + (qty === undefined ? '?' : qty);
+        chipsDiv.appendChild(chip);
+      }
+      if (to && Object.keys(toStock).length) {
+        var qty2 = toStock[product.name];
+        var chip2 = document.createElement('span');
+        chip2.className = 'chip ' + ((!qty2 || qty2<=0) ? 'chip-zero' : 'chip-to');
+        chip2.textContent = to + ': ' + (qty2 === undefined ? '?' : qty2);
+        chipsDiv.appendChild(chip2);
+      }
+      div.appendChild(chipsDiv);
+    }
+
+    if (!already) {
+      div.addEventListener('click', (function(prod){
+        return function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          addItem(prod.name, prod.sku || '');
+        };
+      })(product));
+    }
+
+    ddEl.appendChild(div);
+  });
+  ddEl.classList.add('open');
+});
+
+document.addEventListener('click', function(e){
+  if (!e.target.closest('.search-wrap')) ddEl.classList.remove('open');
+});
+
+function addItem(name, sku) {
+  if (items.some(function(x){ return x.name === name; })) return;
+  items.push({name: name, sku: sku, qty: 1});
+  inpSearch.value = '';
+  ddEl.classList.remove('open');
+  renderItems();
+}
+
+function removeItem(idx) {
+  items.splice(idx, 1);
+  renderItems();
+}
+
+function setQty(idx, val) {
+  var n = parseInt(val);
+  if (n > 0) items[idx].qty = n;
+}
+
+function renderItems() {
+  var list = document.getElementById('items-list');
+  list.innerHTML = '';
+  if (!items.length) {
+    var em = document.createElement('div');
+    em.className = 'empty-msg';
+    em.textContent = 'No items added yet';
+    list.appendChild(em);
+    return;
+  }
+
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+
+  items.forEach(function(item, idx) {
+    var row = document.createElement('div');
+    row.className = 'item-row';
+
+    var info = document.createElement('div');
+    info.className = 'item-info';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'item-name';
+    nameEl.textContent = item.name;
+    info.appendChild(nameEl);
+
+    if (item.sku) {
+      var skuEl = document.createElement('div');
+      skuEl.className = 'item-meta';
+      skuEl.textContent = item.sku;
+      info.appendChild(skuEl);
+    }
+
+    // Stock chips
+    if ((from && Object.keys(fromStock).length) || (to && Object.keys(toStock).length)) {
+      var chipsDiv = document.createElement('div');
+      chipsDiv.className = 'item-chips';
+      if (from && Object.keys(fromStock).length) {
+        var qty = fromStock[item.name];
+        var chip = document.createElement('span');
+        chip.className = 'chip ' + ((!qty || qty<=0) ? 'chip-zero' : 'chip-from');
+        chip.textContent = from + ': ' + (qty === undefined ? '?' : qty);
+        chipsDiv.appendChild(chip);
+      }
+      if (to && Object.keys(toStock).length) {
+        var qty2 = toStock[item.name];
+        var chip2 = document.createElement('span');
+        chip2.className = 'chip ' + ((!qty2 || qty2<=0) ? 'chip-zero' : 'chip-to');
+        chip2.textContent = to + ': ' + (qty2 === undefined ? '?' : qty2);
+        chipsDiv.appendChild(chip2);
+      }
+      info.appendChild(chipsDiv);
+    }
+
+    var qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.className = 'item-qty';
+    qtyInput.value = item.qty;
+    qtyInput.min = 1;
+    (function(i){ qtyInput.onchange = function(){ setQty(i, this.value); }; })(idx);
+
+    var rmBtn = document.createElement('button');
+    rmBtn.className = 'remove-btn';
+    rmBtn.textContent = '\u2715';
+    (function(i){ rmBtn.onclick = function(){ removeItem(i); }; })(idx);
+
+    row.appendChild(info);
+    row.appendChild(qtyInput);
+    row.appendChild(rmBtn);
+    list.appendChild(row);
+  });
+}
+
+// ── Submit ────────────────────────────────────────────────────────
+function showBanner(type, msg) {
+  ['success','error','warning'].forEach(function(t){
+    var el = document.getElementById('banner-'+t);
+    el.style.display = t===type ? 'block' : 'none';
+    if (t===type) el.textContent = msg;
+  });
+}
+function hideBanners(){ ['success','error','warning'].forEach(function(t){ document.getElementById('banner-'+t).style.display='none'; }); }
+
+function clearAll() {
+  items = []; renderItems();
+  document.getElementById('sel-from').value = '';
+  document.getElementById('sel-to').value = '';
+  document.getElementById('sel-who').value = '';
+  document.getElementById('inp-notes').value = '';
+  document.getElementById('stock-status').textContent = '';
+  fromStock = {}; toStock = {};
+  hideBanners();
+}
+
+function submitTransfer() {
+  hideBanners();
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+  var who  = document.getElementById('sel-who').value;
+  if (!from) { showBanner('error','Select a From location.'); return; }
+  if (!to)   { showBanner('error','Select a To location.'); return; }
+  if (from===to) { showBanner('error','From and To must be different.'); return; }
+  if (!who)  { showBanner('error','Select who is doing this transfer.'); return; }
+  if (!items.length) { showBanner('error','Add at least one product.'); return; }
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Saving...';
+
+  var payload = {
+    date: new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}),
+    from: from, to: to, who: who,
+    notes: document.getElementById('inp-notes').value.trim(),
+    items: items.map(function(i){ return {n: i.name, s: i.sku, qty: i.qty}; })
+  };
+
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify(payload)))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.success) {
+        var entry = {from:from, to:to, who:who, notes:payload.notes, items:items.slice(),
+          ts: new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})};
+        logs.unshift(entry);
+        renderLog();
+        var msg = 'Transfer logged \u2014 ' + items.length + ' item' + (items.length>1?'s':'') + ' from ' + from + ' to ' + to + '. Pending Madi approval.';
+        if (data.warnings && data.warnings.length) msg += ' Note: ' + data.warnings.join('; ');
+        showBanner(data.warnings&&data.warnings.length?'warning':'success', msg);
+        items = []; renderItems();
+        document.getElementById('inp-notes').value = '';
+        setTimeout(loadPending, 1000);
+      } else {
+        showBanner('error', 'Error: ' + (data.error||'Unknown error'));
+      }
+    })
+    .catch(function(){ showBanner('error','Could not reach Google Sheet. Check your connection.'); })
+    .finally(function(){ btn.disabled=false; btn.innerHTML='Log transfer &#x2192; Google Sheet'; });
+}
+
+// ── Pending transfers ─────────────────────────────────────────────
+function loadPending() {
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getPendingTransfers'})))
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if (d && d.transfers) renderPending(d.transfers); })
+    .catch(function(){});
+}
+loadPending();
+
+function renderPending(transfers) {
+  var list = document.getElementById('pending-list');
+  document.getElementById('pending-count').textContent = transfers.length;
+  list.innerHTML = '';
+
+  if (!transfers.length) {
+    var em = document.createElement('div');
+    em.className = 'pending-empty';
+    em.textContent = 'No pending transfers';
+    list.appendChild(em);
+    return;
+  }
+
+  transfers.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'pending-card';
+
+    var header = document.createElement('div');
+    header.className = 'pending-header';
+    var route = document.createElement('span');
+    route.className = 'pending-route';
+    route.textContent = t.from + ' \u2192 ' + t.to;
+    var who = document.createElement('span');
+    who.className = 'badge badge-who';
+    who.textContent = t.who;
+    var meta = document.createElement('span');
+    meta.className = 'pending-meta';
+    meta.textContent = t.date;
+    header.appendChild(route);
+    header.appendChild(who);
+    if (t.notes) {
+      var note = document.createElement('span');
+      note.className = 'badge badge-note';
+      note.textContent = t.notes;
+      header.appendChild(note);
+    }
+    header.appendChild(meta);
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'pending-items';
+    t.items.forEach(function(i){
+      var row = document.createElement('div');
+      row.className = 'pending-item';
+      var nm = document.createElement('span'); nm.textContent = i.name;
+      var qty = document.createElement('span'); qty.className='pending-item-qty'; qty.textContent='x'+i.qty;
+      row.appendChild(nm); row.appendChild(qty);
+      itemsDiv.appendChild(row);
+    });
+
+    var note = document.createElement('div');
+    note.style.cssText = 'font-size:11px;color:#999;margin-top:8px;font-style:italic;';
+    note.textContent = 'Mark as Done in the Transfer Log tab in Google Sheets';
+    card.appendChild(header);
+    card.appendChild(itemsDiv);
+    card.appendChild(note);
+    list.appendChild(card);
+  });
+}
+
+
+
+// ── Log ───────────────────────────────────────────────────────────
+function renderLog() {
+  var sec = document.getElementById('log-section');
+  var list = document.getElementById('log-list');
+  if (!logs.length) { sec.style.display='none'; return; }
+  sec.style.display='';
+  list.innerHTML='';
+  logs.forEach(function(e){
+    var entry = document.createElement('div');
+    entry.className = 'log-entry';
+    var header = document.createElement('div');
+    header.className = 'log-header';
+    var route = document.createElement('span'); route.className='log-route'; route.textContent=e.from+' \u2192 '+e.to;
+    var who = document.createElement('span'); who.className='badge badge-who'; who.textContent=e.who;
+    var saved = document.createElement('span'); saved.className='badge badge-saved'; saved.textContent='Pending';
+    var time = document.createElement('span'); time.className='log-time'; time.textContent=e.ts;
+    header.appendChild(route); header.appendChild(who); header.appendChild(saved); header.appendChild(time);
+    entry.appendChild(header);
+    e.items.forEach(function(i){
+      var row = document.createElement('div'); row.className='log-item';
+      var nm = document.createElement('span'); nm.textContent=i.name+(i.sku?' ('+i.sku+')':'');
+      var qty = document.createElement('span'); qty.className='log-item-qty'; qty.textContent='x '+i.qty;
+      row.appendChild(nm); row.appendChild(qty); entry.appendChild(row);
+    });
+    list.appendChild(entry);
+  });
+}
+</script>
+</body>
+</html>
