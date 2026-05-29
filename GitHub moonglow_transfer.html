@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moonglow — Stock Transfer</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: #F5F0E8; color: #1A1A2E; min-height: 100vh; padding: 20px 16px 40px; }
+  .container { max-width: 600px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .header h1 { font-size: 20px; font-weight: 600; color: #1A1A2E; }
+  .date-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #E2D5B8; color: #5A4A2A; }
+  .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #27AE60; margin-right: 5px; }
+  .live-label { font-size: 12px; color: #666; margin-left: auto; }
+  .card { background: #fff; border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .card-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  .row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 10px; }
+  .row:last-child { margin-bottom: 0; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .04em; }
+  .arrow { padding-bottom: 8px; font-size: 18px; color: #ccc; flex-shrink: 0; }
+  select, input[type=text], input[type=number] { width: 100%; padding: 9px 12px; border: 1px solid #E0D8CC; border-radius: 10px; background: #FDFBF8; color: #1A1A2E; font-size: 13px; font-family: inherit; appearance: none; -webkit-appearance: none; }
+  select:focus, input:focus { outline: none; border-color: #E2B96B; box-shadow: 0 0 0 3px rgba(226,185,107,.15); }
+  .search-wrap { position: relative; margin-bottom: 10px; }
+  .search-wrap input { padding-left: 36px; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 15px; pointer-events: none; }
+  .dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fff; border: 1px solid #E0D8CC; border-radius: 12px; max-height: 260px; overflow-y: auto; z-index: 200; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+  .dropdown.open { display: block; }
+  .dd-item { padding: 9px 14px; cursor: pointer; border-bottom: 1px solid #F5F0E8; }
+  .dd-item:last-child { border-bottom: none; }
+  .dd-item:hover, .dd-item.active { background: #FBF7F0; }
+  .dd-name { font-size: 13px; color: #1A1A2E; }
+  .dd-sku { font-size: 11px; color: #999; margin-top: 1px; }
+  .dd-stock { display: flex; gap: 8px; margin-top: 4px; }
+  .dd-stock-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .dd-stock-from { background: #FFF3E0; color: #E65100; }
+  .dd-stock-to   { background: #E8F5E9; color: #2E7D32; }
+  .dd-stock-zero { background: #FDECEA; color: #C0392B; }
+  .dd-added { opacity: .4; }
+  .items-list { margin-top: 4px; }
+  .item-row { display: flex; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid #F5F0E8; }
+  .item-row:last-child { border-bottom: none; }
+  .item-info { flex: 1; min-width: 0; overflow: hidden; }
+  .item-name { font-size: 13px; color: #1A1A2E; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-name { font-size: 13px; color: #1A1A2E; line-height: 1.3; }
+  .item-sku { font-size: 11px; color: #999; margin-top: 1px; }
+  .item-stock { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+  .stock-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; }
+  .stock-from { background: #FFF3E0; color: #E65100; }
+  .stock-to   { background: #E8F5E9; color: #2E7D32; }
+  .stock-zero { background: #FDECEA; color: #C0392B; }
+  .item-qty { width: 56px; text-align: center; flex-shrink: 0; }
+  .remove-btn { background: none; border: 1px solid #FFCDD2; border-radius: 8px; color: #E53935; padding: 4px 8px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+  .remove-btn:hover { background: #FFF5F5; }
+  .empty-msg { text-align: center; color: #bbb; font-size: 13px; padding: 16px 0; }
+  .btn-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .btn { padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-clear { background: #EEE8DE; color: #666; flex-shrink: 0; }
+  .btn-submit { background: #1A1A2E; color: #E2B96B; flex: 1; font-size: 15px; }
+  .btn-submit:hover:not(:disabled) { opacity: .88; }
+  .banner { border-radius: 12px; padding: 12px 16px; font-size: 13px; margin-bottom: 14px; display: none; line-height: 1.5; }
+  .banner-success { background: #EAF6F0; color: #1A7A4A; border: 1px solid #A8DEC4; }
+  .banner-error   { background: #FDECEA; color: #C0392B; border: 1px solid #F5A9A3; }
+  .banner-warning { background: #FFF8E7; color: #B8860B; border: 1px solid #F5D78A; }
+  .stock-loading { font-size: 12px; color: #bbb; padding: 6px 0; font-style: italic; }
+  .log-section { margin-top: 8px; }
+  .log-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .log-entry { background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); }
+  .log-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .log-route { font-size: 14px; font-weight: 600; color: #1A1A2E; }
+  .log-arrow { color: #ccc; }
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .badge-who { background: #EAF2FB; color: #1A5A9A; }
+  .badge-saved { background: #EAF6F0; color: #1A7A4A; margin-left: auto; }
+  .badge-note { background: #F5F0E8; color: #7A6A4A; }
+  .log-time { font-size: 11px; color: #bbb; }
+  .log-item { display: flex; justify-content: space-between; font-size: 12px; color: #888; padding: 2px 0; }
+  .log-item-qty { font-weight: 600; color: #1A1A2E; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #E2B96B; border-top-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pending-section { margin-bottom: 14px; }
+  .pending-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .pending-count { background: #FFF8E7; color: #B8860B; border: 1px solid #F5D78A; border-radius: 20px; padding: 2px 8px; font-size: 11px; }
+  .pending-empty { text-align: center; color: #bbb; font-size: 13px; padding: 12px 0; }
+  .pending-card { background: #fff; border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border: 2px solid #F5D78A; }
+  .pending-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .pending-route { font-size: 14px; font-weight: 600; color: #1A1A2E; }
+  .pending-meta { font-size: 11px; color: #999; }
+  .pending-items { margin-bottom: 12px; }
+  .pending-item { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 3px 0; border-bottom: 1px solid #F5F0E8; }
+  .pending-item:last-child { border-bottom: none; }
+  .pending-item-qty { font-weight: 600; color: #1A1A2E; }
+  .btn-done { background: #1A7A4A; color: #fff; border: none; border-radius: 8px; padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; width: 100%; }
+  .btn-done:hover { opacity: .88; }
+  .btn-done:disabled { opacity: .5; cursor: not-allowed; }
+  .refresh-btn { background: none; border: 1px solid #E0D8CC; border-radius: 8px; padding: 4px 10px; font-size: 12px; color: #888; cursor: pointer; font-family: inherit; }
+  @media (max-width: 480px) { body { padding: 12px 12px 32px; } .row { flex-direction: column; } .arrow { display: none; } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Stock transfer</h1>
+    <span class="date-chip" id="today-chip"></span>
+    <span class="live-label"><span class="live-dot"></span>Writes to Google Sheet</span>
+  </div>
+
+  <div id="banner-success" class="banner banner-success"></div>
+  <div id="banner-error"   class="banner banner-error"></div>
+  <div id="banner-warning" class="banner banner-warning"></div>
+
+  <div class="card">
+    <div class="card-title">Transfer details</div>
+    <div class="row">
+      <div class="field">
+        <label>From</label>
+        <select id="sel-from" onchange="onLocationChange()"><option value="">Select location...</option></select>
+      </div>
+      <div class="arrow">&#x2192;</div>
+      <div class="field">
+        <label>To</label>
+        <select id="sel-to" onchange="onLocationChange()"><option value="">Select location...</option></select>
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Transferred by</label>
+        <select id="sel-who">
+          <option value="">Select person...</option>
+          <option>Treva</option>
+          <option>Madi</option>
+          <option>Charlotte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <input type="text" id="inp-notes" placeholder="e.g. Market restock">
+      </div>
+    </div>
+    <div id="stock-status" class="stock-loading" style="display:none"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Add products</div>
+    <div class="search-wrap">
+      <span class="search-icon">&#x1F50D;</span>
+      <input type="text" id="inp-search" placeholder="Search by name or SKU..." autocomplete="off">
+      <div class="dropdown" id="dd"></div>
+    </div>
+    <div class="items-list" id="items-list">
+      <div class="empty-msg" id="empty-msg">No items added yet</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+    <button class="btn btn-submit" id="submit-btn" onclick="submitTransfer()">Log transfer &#x2192; Google Sheet</button>
+  </div>
+
+  <!-- PENDING TRANSFERS -->
+  <div class="pending-section" id="pending-section">
+    <div class="pending-title">
+      Pending Transfers
+      <span class="pending-count" id="pending-count">0</span>
+      <button class="refresh-btn" onclick="loadPending()">&#x21BB; Refresh</button>
+    </div>
+    <div id="pending-list"><div class="pending-empty">No pending transfers</div></div>
+  </div>
+
+  <div class="log-section" id="log-section" style="display:none">
+    <div class="log-title">Logged this session</div>
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec";
+var LOCATIONS = ['Cairns','Eumundi','Fremantle','Melbourne','Moonglow HQ','Travel'];
+var PRODUCTS = [];
+var items = [];
+var logs = [];
+var activeIdx = -1;
+var ddResults = [];
+var fromStock = {};
+var toStock = {};
+var stockLoading = false;
+
+document.getElementById('today-chip').textContent = new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+// Populate location dropdowns
+// Populate location dropdowns directly in HTML is safer
+var fromSel = document.getElementById('sel-from');
+var toSel = document.getElementById('sel-to');
+LOCATIONS.forEach(function(loc) {
+  var o1 = document.createElement('option'); o1.value = loc; o1.text = loc; fromSel.add(o1);
+  var o2 = document.createElement('option'); o2.value = loc; o2.text = loc; toSel.add(o2);
+});
+
+// Load all products
+function loadProducts() {
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getProducts'})))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if (d && d.products) {
+        PRODUCTS = d.products.map(function(p){return {n:p.name, s:p.sku||''};});
+        document.getElementById('inp-search').placeholder = 'Search by name or SKU... (' + PRODUCTS.length + ' products)';
+      }
+    })
+    .catch(function(){});
+}
+loadProducts();
+
+// Load stock for both locations when they change
+function onLocationChange() {
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+  fromStock = {}; toStock = {};
+  if (!from && !to) return;
+
+  var status = document.getElementById('stock-status');
+  status.style.display = 'block';
+  status.textContent = 'Loading stock levels...';
+  stockLoading = true;
+
+  var promises = [];
+  if (from) promises.push(
+    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:from})))
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.stock) fromStock=d.stock;})
+  );
+  if (to) promises.push(
+    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:to})))
+      .then(function(r){return r.json();})
+      .then(function(d){if(d&&d.stock) toStock=d.stock;})
+  );
+
+  Promise.all(promises).then(function(){
+    stockLoading = false;
+    var parts = [];
+    if (from) parts.push(from + ': ' + Object.keys(fromStock).length + ' products loaded');
+    if (to)   parts.push(to + ': ' + Object.keys(toStock).length + ' products loaded');
+    status.textContent = '✓ ' + parts.join(' | ');
+    renderItems(); // refresh quantities on existing items
+  }).catch(function(){
+    stockLoading = false;
+    status.textContent = 'Could not load stock levels';
+  });
+}
+
+function getStockChips(productName) {
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+  var html = '';
+  if (from && Object.keys(fromStock).length) {
+    var qty = fromStock[productName];
+    var cls = (qty === undefined || qty === 0) ? 'stock-zero' : 'stock-from';
+    html += '<span class="stock-chip '+cls+'">'+(from)+': '+(qty === undefined ? '?' : qty)+'</span>';
+  }
+  if (to && Object.keys(toStock).length) {
+    var qty2 = toStock[productName];
+    var cls2 = (qty2 === undefined || qty2 === 0) ? 'stock-zero' : 'stock-to';
+    html += '<span class="stock-chip '+cls2+'">'+(to)+': '+(qty2 === undefined ? '?' : qty2)+'</span>';
+  }
+  return html;
+}
+
+function getDdStockChips(productName) {
+  var from = document.getElementById('sel-from').value;
+  var to   = document.getElementById('sel-to').value;
+  var html = '';
+  if (from && Object.keys(fromStock).length) {
+    var qty = fromStock[productName];
+    var cls = (qty === undefined || qty === 0) ? 'dd-stock-zero' : 'dd-stock-from';
+    html += '<span class="dd-stock-chip '+cls+'">'+(from)+': '+(qty === undefined ? '?' : qty)+'</span>';
+  }
+  if (to && Object.keys(toStock).length) {
+    var qty2 = toStock[productName];
+    var cls2 = (qty2 === undefined || qty2 === 0) ? 'dd-stock-zero' : 'dd-stock-to';
+    html += '<span class="dd-stock-chip '+cls2+'">'+(to)+': '+(qty2 === undefined ? '?' : qty2)+'</span>';
+  }
+  return html;
+}
+
+// Search
+var inpSearch = document.getElementById('inp-search');
+var ddEl = document.getElementById('dd');
+
+inpSearch.addEventListener('input', function(){
+  var q = inpSearch.value.toLowerCase().trim();
+  if (q.length < 2) {ddEl.classList.remove('open'); return;}
+  ddResults = PRODUCTS.filter(function(p){
+    return p.n.toLowerCase().indexOf(q) >= 0 || (p.s && p.s.toLowerCase().indexOf(q) >= 0);
+  }).slice(0,40);
+  activeIdx = -1;
+  renderDD();
+});
+
+inpSearch.addEventListener('keydown', function(e){
+  if (!ddEl.classList.contains('open')) return;
+  if (e.key==='ArrowDown'){e.preventDefault(); activeIdx=Math.min(activeIdx+1,ddResults.length-1); renderDD();}
+  else if (e.key==='ArrowUp'){e.preventDefault(); activeIdx=Math.max(activeIdx-1,0); renderDD();}
+  else if (e.key==='Enter'&&activeIdx>=0){e.preventDefault(); selectProduct(ddResults[activeIdx]);}
+  else if (e.key==='Escape') ddEl.classList.remove('open');
+});
+
+document.addEventListener('click', function(e){
+  if (!ddEl.contains(e.target) && e.target !== inpSearch) ddEl.classList.remove('open');
+});
+
+function renderDD(){
+  ddEl.innerHTML = '';
+  if (!ddResults.length){
+    ddEl.innerHTML = '<div class="dd-item"><div class="dd-name" style="color:#bbb">No matches found</div></div>';
+    ddEl.classList.add('open'); return;
+  }
+  ddResults.forEach(function(p,i){
+    var already = items.find(function(x){return x.n===p.n;});
+    var div = document.createElement('div');
+    div.className = 'dd-item'+(i===activeIdx?' active':'')+(already?' dd-added':'');
+    var stockHtml = getDdStockChips(p.n);
+    div.innerHTML = '<div class="dd-name">'+p.n+(already?' <small style="color:#bbb">(added)</small>':'')+'</div>'
+      +(p.s?'<div class="dd-sku">'+p.s+'</div>':'')
+      +(stockHtml?'<div class="dd-stock">'+stockHtml+'</div>':'');
+    div.addEventListener('mousedown', function(e){e.preventDefault(); if(!already) selectProduct(p);});
+    ddEl.appendChild(div);
+  });
+  ddEl.classList.add('open');
+}
+
+function selectProduct(p){
+  items.push({n:p.n, s:p.s||'', qty:1});
+  inpSearch.value='';
+  ddEl.classList.remove('open');
+  activeIdx=-1;
+  renderItems();
+}
+
+function renderItems(){
+  var list = document.getElementById('items-list');
+  if (!items.length){list.innerHTML='<div class="empty-msg" id="empty-msg">No items added yet</div>';return;}
+  list.innerHTML='';
+  items.forEach(function(item,i){
+    var stockHtml = getStockChips(item.n);
+    var row = document.createElement('div');
+    row.className = 'item-row';
+    row.innerHTML = '<div class="item-info">'
+      +'<div class="item-name">'+item.n+'</div>'
+      +(item.s?'<div class="item-sku">'+item.s+'</div>':'')
+      +(stockHtml?'<div class="item-stock">'+stockHtml+'</div>':'')
+      +'</div>'
+      +'<input type="number" class="item-qty" min="1" value="'+item.qty+'" onchange="setQty('+i+',this.value)">'
+      +'<button class="remove-btn" onclick="removeItem('+i+')">&#x2715;</button>';
+    list.appendChild(row);
+  });
+}
+
+function setQty(i,v){var n=parseInt(v);if(n>0) items[i].qty=n;}
+function removeItem(i){items.splice(i,1);renderItems();}
+
+function showBanner(type,msg){
+  ['success','error','warning'].forEach(function(t){
+    var el=document.getElementById('banner-'+t);
+    el.style.display=t===type?'block':'none';
+    if(t===type) el.innerHTML=msg;
+  });
+}
+function hideBanners(){['success','error','warning'].forEach(function(t){document.getElementById('banner-'+t).style.display='none';});}
+
+function clearAll(){
+  items=[];renderItems();
+  document.getElementById('sel-from').value='';
+  document.getElementById('sel-to').value='';
+  document.getElementById('sel-who').value='';
+  document.getElementById('inp-notes').value='';
+  document.getElementById('stock-status').style.display='none';
+  inpSearch.value='';
+  fromStock={};toStock={};
+  hideBanners();
+}
+
+function submitTransfer(){
+  hideBanners();
+  var from=document.getElementById('sel-from').value;
+  var to=document.getElementById('sel-to').value;
+  var who=document.getElementById('sel-who').value;
+  if(!from){showBanner('error','Select a From location.');return;}
+  if(!to){showBanner('error','Select a To location.');return;}
+  if(from===to){showBanner('error','From and To must be different.');return;}
+  if(!who){showBanner('error','Select who is doing this transfer.');return;}
+  if(!items.length){showBanner('error','Add at least one product.');return;}
+
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner"></span>Saving...';
+
+  var payload={
+    date:new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}),
+    from:from,to:to,who:who,
+    notes:document.getElementById('inp-notes').value.trim(),
+    items:items.map(function(i){return{n:i.n,s:i.s,qty:i.qty};})
+  };
+
+  fetch(API+'?payload='+encodeURIComponent(JSON.stringify(payload)))
+    .then(function(res){return res.json();})
+    .then(function(data){
+      if(data.success){
+        var entry=JSON.parse(JSON.stringify(payload));
+        entry.ts=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+        logs.unshift(entry);renderLog();
+        var msg='Transfer logged &#x2014; '+items.length+' item'+(items.length>1?'s':'')+' from '+from+' to '+to+'.';
+        if(data.warnings&&data.warnings.length) msg+=' Note: '+data.warnings.join('; ');
+        showBanner(data.warnings&&data.warnings.length?'warning':'success',msg);
+        items=[];
+        document.getElementById('inp-notes').value='';
+        renderItems();
+        // Reload stock to reflect the transfer
+        onLocationChange();
+      }else{
+        showBanner('error','Error from Google Sheet: '+(data.error||'Unknown error'));
+      }
+    })
+    .catch(function(){showBanner('error','Could not reach Google Sheet. Check your connection.');})
+    .finally(function(){btn.disabled=false;btn.innerHTML='Log transfer &#x2192; Google Sheet';});
+}
+
+function loadPending() {
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getPendingTransfers'})))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if (d && d.transfers) renderPending(d.transfers);
+    })
+    .catch(function(){});
+}
+loadPending();
+
+function renderPending(transfers) {
+  var list = document.getElementById('pending-list');
+  var count = document.getElementById('pending-count');
+  count.textContent = transfers.length;
+  list.innerHTML = '';
+
+  if (!transfers.length) {
+    var empty = document.createElement('div');
+    empty.className = 'pending-empty';
+    empty.textContent = 'No pending transfers';
+    list.appendChild(empty);
+    return;
+  }
+
+  transfers.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'pending-card';
+
+    var header = document.createElement('div');
+    header.className = 'pending-header';
+    var route = document.createElement('span');
+    route.className = 'pending-route';
+    route.textContent = t.from + ' → ' + t.to;
+    var who = document.createElement('span');
+    who.className = 'badge badge-who';
+    who.textContent = t.who;
+    var meta = document.createElement('span');
+    meta.className = 'pending-meta';
+    meta.textContent = t.date;
+    header.appendChild(route);
+    header.appendChild(who);
+    if (t.notes) {
+      var note = document.createElement('span');
+      note.className = 'badge badge-note';
+      note.textContent = t.notes;
+      header.appendChild(note);
+    }
+    header.appendChild(meta);
+
+    var itemsDiv = document.createElement('div');
+    itemsDiv.className = 'pending-items';
+    t.items.forEach(function(i) {
+      var row = document.createElement('div');
+      row.className = 'pending-item';
+      var nm = document.createElement('span');
+      nm.textContent = i.name;
+      var qty = document.createElement('span');
+      qty.className = 'pending-item-qty';
+      qty.textContent = 'x' + i.qty;
+      row.appendChild(nm);
+      row.appendChild(qty);
+      itemsDiv.appendChild(row);
+    });
+
+    var btn = document.createElement('button');
+    btn.className = 'btn-done';
+    btn.id = 'done-' + t.id;
+    btn.textContent = '✓ Mark as Done — Deduct Stock';
+    (function(id) { btn.onclick = function() { completeTransfer(id); }; })(t.id);
+
+    card.appendChild(header);
+    card.appendChild(itemsDiv);
+    card.appendChild(btn);
+    list.appendChild(card);
+  });
+}
+
+
+function completeTransfer(transferId) {
+  var btn = document.getElementById('done-' + transferId);
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Processing...';
+
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'completeTransfer', transferId:transferId})))
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if (data.success) {
+        var msg = 'Transfer completed &#x2014; stock deducted from source and added to destination.';
+        if (data.warnings && data.warnings.length) msg += ' Note: ' + data.warnings.join('; ');
+        showBanner(data.warnings && data.warnings.length ? 'warning' : 'success', msg);
+        loadPending();
+        onLocationChange(); // refresh stock display
+      } else {
+        showBanner('error', 'Error: ' + (data.error || 'Unknown error'));
+        btn.disabled = false;
+        btn.innerHTML = '&#x2713; Mark as Done &#x2014; Deduct Stock';
+      }
+    })
+    .catch(function(){
+      showBanner('error', 'Could not reach Google Sheet.');
+      btn.disabled = false;
+      btn.innerHTML = '&#x2713; Mark as Done &#x2014; Deduct Stock';
+    });
+}
+
+function renderLog(){
+  var sec=document.getElementById('log-section');
+  var list=document.getElementById('log-list');
+  if(!logs.length){sec.style.display='none';return;}
+  sec.style.display='';
+  list.innerHTML=logs.map(function(e){
+    return '<div class="log-entry">'
+      +'<div class="log-header">'
+      +'<span class="log-route">'+e.from+'</span>'
+      +'<span class="log-arrow"> &#x2192; </span>'
+      +'<span class="log-route">'+e.to+'</span>'
+      +'<span class="badge badge-who">'+e.who+'</span>'
+      +(e.notes?'<span class="badge badge-note">'+e.notes+'</span>':'')
+      +'<span class="badge badge-saved">Saved</span>'
+      +'<span class="log-time">'+e.ts+'</span>'
+      +'</div>'
+      +e.items.map(function(i){
+        return '<div class="log-item"><span>'+i.n+(i.s?' ('+i.s+')':'')+'</span><span class="log-item-qty">x '+i.qty+'</span></div>';
+      }).join('')
+      +'</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>

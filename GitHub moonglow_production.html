@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moonglow — Production Run</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; background: #f8f2ed; color: #2c1e14; min-height: 100vh; padding: 20px 16px 40px; }
+  .container { max-width: 600px; margin: 0 auto; }
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .header h1 { font-size: 20px; font-weight: 600; color: #2c1e14; }
+  .date-chip { font-size: 12px; padding: 3px 10px; border-radius: 20px; background: #f2e4d9; color: #6a4a2a; }
+  .live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #27AE60; margin-right: 5px; }
+  .live-label { font-size: 12px; color: #9a8070; margin-left: auto; }
+  .card { background: #fffaf6; border-radius: 14px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); border: 1px solid #e0d0c0; }
+  .card-title { font-size: 11px; font-weight: 600; color: #9a8070; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+  .card-title span { font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-left: 8px; font-weight: 500; }
+  .consume-badge { background: #fdf0f1; color: #8d4b53; border: 1px solid #f0c8cb; }
+  .produce-badge { background: #edf5eb; color: #5a7a52; border: 1px solid #c3dbbf; }
+  .row { display: flex; gap: 10px; margin-bottom: 10px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; color: #9a8070; text-transform: uppercase; letter-spacing: .04em; }
+  select, input[type=text], input[type=number] { width: 100%; padding: 9px 12px; border: 1px solid #e0d0c0; border-radius: 10px; background: #f8f2ed; color: #2c1e14; font-size: 13px; font-family: inherit; appearance: none; -webkit-appearance: none; }
+  select:focus, input:focus { outline: none; border-color: #ad6639; box-shadow: 0 0 0 3px rgba(173,102,57,.12); }
+  .mode-toggle { display: flex; border-radius: 12px; overflow: hidden; border: 2px solid #ad6639; margin-bottom: 14px; }
+  .mode-btn { flex: 1; padding: 12px; border: none; cursor: pointer; font-size: 14px; font-weight: 600; font-family: inherit; transition: all .2s; background: #f8f2ed; color: #9a8070; }
+  .mode-btn.active { background: #ad6639; color: #fff; }
+  .mode-btn:first-child { border-right: 1px solid #ad6639; }
+  .search-wrap { position: relative; margin-bottom: 10px; }
+  .search-wrap input { padding-left: 36px; }
+  .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #9a8070; font-size: 15px; pointer-events: none; }
+  .dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: #fffaf6; border: 1px solid #e0d0c0; border-radius: 12px; max-height: 240px; overflow-y: auto; z-index: 200; display: none; box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+  .dropdown.open { display: block; }
+  .dd-item { padding: 9px 14px; cursor: pointer; border-bottom: 1px solid #f2e4d9; }
+  .dd-item:last-child { border-bottom: none; }
+  .dd-item:hover { background: #f2e4d9; }
+  .dd-name { font-size: 13px; color: #2c1e14; }
+  .dd-sku { font-size: 11px; color: #9a8070; margin-top: 2px; }
+  .items-list { margin-top: 4px; }
+  .item-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #f2e4d9; }
+  .item-row:last-child { border-bottom: none; }
+  .item-name { flex: 1; font-size: 13px; color: #2c1e14; line-height: 1.3; }
+  .item-sku { font-size: 11px; color: #9a8070; }
+  .item-qty { width: 60px; text-align: center; }
+  .remove-btn { background: none; border: 1px solid #f0c8cb; border-radius: 8px; color: #8d4b53; padding: 4px 8px; cursor: pointer; font-size: 12px; flex-shrink: 0; }
+  .remove-btn:hover { background: #fdf0f1; }
+  .empty-msg { text-align: center; color: #9a8070; font-size: 13px; padding: 16px 0; }
+  .divider { border: none; border-top: 2px dashed #e0d0c0; margin: 4px 0 14px; }
+  .btn-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .btn { padding: 11px 18px; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; border: none; transition: opacity .15s; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-clear { background: #f2e4d9; color: #9a8070; flex-shrink: 0; }
+  .btn-submit { background: #ad6639; color: #fff; flex: 1; font-size: 15px; }
+  .btn-submit:hover:not(:disabled) { opacity: .88; }
+  .banner { border-radius: 12px; padding: 12px 16px; font-size: 13px; margin-bottom: 14px; display: none; line-height: 1.5; }
+  .banner-success { background: #edf5eb; color: #3a6a32; border: 1px solid #c3dbbf; }
+  .banner-error { background: #fdf0f1; color: #8d4b53; border: 1px solid #f0c8cb; }
+  .banner-warning { background: #fdf6e3; color: #8a6a2a; border: 1px solid #e8d5a3; }
+  .log-section { margin-top: 8px; }
+  .log-title { font-size: 11px; font-weight: 600; color: #9a8070; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .log-entry { background: #fffaf6; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05); border: 1px solid #e0d0c0; }
+  .log-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .log-loc { font-size: 14px; font-weight: 600; color: #2c1e14; }
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .badge-who { background: #f2e4d9; color: #6a4a2a; }
+  .badge-build { background: #edf5eb; color: #3a6a32; }
+  .badge-dismantle { background: #fdf0f1; color: #8d4b53; }
+  .badge-saved { background: #edf5eb; color: #3a6a32; margin-left: auto; }
+  .badge-note { background: #f8f2ed; color: #9a8070; }
+  .log-time { font-size: 11px; color: #b8a898; }
+  .log-sl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin: 8px 0 4px; }
+  .log-sl.c { color: #8d4b53; }
+  .log-sl.p { color: #5a7a52; }
+  .log-item { display: flex; justify-content: space-between; font-size: 12px; color: #9a8070; padding: 2px 0; }
+  .log-item-qty { font-weight: 600; color: #2c1e14; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>&#x1F319; Production Run</h1>
+    <span class="date-chip" id="today-chip"></span>
+    <span class="live-label"><span class="live-dot"></span>Writes to Google Sheet</span>
+  </div>
+
+  <div id="banner-success" class="banner banner-success"></div>
+  <div id="banner-error" class="banner banner-error"></div>
+  <div id="banner-warning" class="banner banner-warning"></div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-build" onclick="setMode('build')">&#x1F528; Build &mdash; Make Products</button>
+    <button class="mode-btn" id="btn-dismantle" onclick="setMode('dismantle')">&#x1F527; Dismantle &mdash; Break Down</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Run Details</div>
+    <div class="row">
+      <div class="field">
+        <label>Location</label>
+        <select id="sel-location">
+          <option value="">Select location...</option>
+          <option>Moonglow HQ</option>
+          <option>Cairns</option>
+          <option>Eumundi</option>
+          <option>Fremantle</option>
+          <option>Melbourne</option>
+          <option>Travel</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Run by</label>
+        <select id="sel-who">
+          <option value="">Select person...</option>
+          <option>Treva</option>
+          <option>Madi</option>
+          <option>Charlotte</option>
+        </select>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:0">
+      <label>Notes (optional)</label>
+      <input type="text" id="inp-notes" placeholder="e.g. Made 10x RM bracelets for Eumundi">
+    </div>
+  </div>
+
+  <div id="build-section">
+    <div class="card">
+      <div class="card-title">Components Used <span class="consume-badge">&minus; Deduct from stock</span></div>
+      <div class="search-wrap">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="inp-consume" placeholder="Search component to deduct..." autocomplete="off" oninput="onSearch('consume')">
+        <div class="dropdown" id="dd-consume"></div>
+      </div>
+      <div class="items-list" id="list-consume"><div class="empty-msg">No components added yet</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">Finished Products Made <span class="produce-badge">+ Add to stock</span></div>
+      <div class="search-wrap">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="inp-produce" placeholder="Search finished product to add..." autocomplete="off" oninput="onSearch('produce')">
+        <div class="dropdown" id="dd-produce"></div>
+      </div>
+      <div class="items-list" id="list-produce"><div class="empty-msg">No finished products added yet</div></div>
+    </div>
+  </div>
+
+  <div id="dismantle-section" style="display:none">
+    <div class="card">
+      <div class="card-title">Product to Dismantle <span class="consume-badge">&minus; Remove from stock</span></div>
+      <div class="search-wrap">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="inp-dismantle" placeholder="Search product to break down..." autocomplete="off" oninput="onSearch('dismantle')">
+        <div class="dropdown" id="dd-dismantle"></div>
+      </div>
+      <div class="items-list" id="list-dismantle"><div class="empty-msg">No product selected yet</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="card">
+      <div class="card-title">Components Recovered <span class="produce-badge">+ Return to stock</span></div>
+      <div class="search-wrap">
+        <span class="search-icon">&#x1F50D;</span>
+        <input type="text" id="inp-recover" placeholder="Search component to return..." autocomplete="off" oninput="onSearch('recover')">
+        <div class="dropdown" id="dd-recover"></div>
+      </div>
+      <div class="items-list" id="list-recover"><div class="empty-msg">No components added yet</div></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-clear" onclick="clearAll()">Clear</button>
+    <button class="btn btn-submit" id="submit-btn" onclick="submitRun()">Log Production Run &#x2192; Google Sheet</button>
+  </div>
+
+  <div class="log-section" id="log-section" style="display:none">
+    <div class="log-title">Logged this session</div>
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<script>
+var API = "https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec";
+var allProducts = [];
+var lists = {consume:[],produce:[],dismantle:[],recover:[]};
+var logs = [];
+var currentMode = 'build';
+
+document.getElementById('today-chip').textContent = new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+
+function loadProducts() {
+  // Show loading state in all search inputs
+  ['consume','produce','dismantle','recover'].forEach(function(t){
+    var inp = document.getElementById('inp-'+t);
+    if(inp) inp.placeholder = 'Loading products...';
+  });
+
+  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getProducts'})))
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d && d.products && d.products.length) {
+        allProducts = d.products;
+        ['consume','produce','dismantle','recover'].forEach(function(t){
+          var inp = document.getElementById('inp-'+t);
+          if(inp) inp.placeholder = 'Search by name or SKU... (' + allProducts.length + ' products)';
+        });
+      } else {
+        ['consume','produce','dismantle','recover'].forEach(function(t){
+          var inp = document.getElementById('inp-'+t);
+          if(inp) inp.placeholder = 'Error loading products — check script URL';
+        });
+      }
+    })
+    .catch(function(err){
+      ['consume','produce','dismantle','recover'].forEach(function(t){
+        var inp = document.getElementById('inp-'+t);
+        if(inp) inp.placeholder = 'Failed to load: ' + err.message;
+      });
+    });
+}
+loadProducts();
+
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById('btn-build').className = 'mode-btn' + (mode==='build'?' active':'');
+  document.getElementById('btn-dismantle').className = 'mode-btn' + (mode==='dismantle'?' active':'');
+  document.getElementById('build-section').style.display = mode==='build' ? '' : 'none';
+  document.getElementById('dismantle-section').style.display = mode==='dismantle' ? '' : 'none';
+}
+
+function onSearch(type) {
+  var q = document.getElementById('inp-'+type).value.toLowerCase().trim();
+  var dd = document.getElementById('dd-'+type);
+  if (q.length < 2) {dd.classList.remove('open'); return;}
+  var results = allProducts.filter(function(p){
+    return p.name.toLowerCase().indexOf(q) >= 0 || (p.sku && p.sku.toLowerCase().indexOf(q) >= 0);
+  }).slice(0,20);
+  if (!results.length) {dd.classList.remove('open'); return;}
+  dd.innerHTML = '';
+  results.forEach(function(p){
+    var item = document.createElement('div');
+    item.className = 'dd-item';
+    item.innerHTML = '<div class="dd-name">'+p.name+'</div>'+(p.sku?'<div class="dd-sku">'+p.sku+'</div>':'');
+    item.onclick = (function(n,s){return function(){addItem(type,n,s||'');};})(p.name,p.sku);
+    dd.appendChild(item);
+  });
+  dd.classList.add('open');
+}
+
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.search-wrap'))
+    document.querySelectorAll('.dropdown').forEach(function(d){d.classList.remove('open');});
+});
+
+function addItem(type,name,sku){
+  if(lists[type].find(function(i){return i.name===name;})){closeDD(type);return;}
+  lists[type].push({name:name,sku:sku,qty:1});
+  renderList(type);closeDD(type);
+}
+
+function closeDD(type){
+  document.getElementById('dd-'+type).classList.remove('open');
+  document.getElementById('inp-'+type).value='';
+}
+
+function removeItem(type,idx){lists[type].splice(idx,1);renderList(type);}
+
+function updateQty(type,idx,val){lists[type][idx].qty=Math.max(1,parseInt(val)||1);}
+
+var emptyMsgs = {consume:'No components added yet',produce:'No finished products added yet',dismantle:'No product selected yet',recover:'No components added yet'};
+
+function renderList(type){
+  var el=document.getElementById('list-'+type);
+  if(!lists[type].length){el.innerHTML='<div class="empty-msg">'+emptyMsgs[type]+'</div>';return;}
+  el.innerHTML='';
+  lists[type].forEach(function(item,idx){
+    var row=document.createElement('div');row.className='item-row';
+    var nm=document.createElement('div');nm.className='item-name';
+    nm.innerHTML=item.name+(item.sku?'<br><span class="item-sku">'+item.sku+'</span>':'');
+    var qi=document.createElement('input');qi.type='number';qi.className='item-qty';qi.value=item.qty;qi.min=1;
+    (function(t,i){qi.onchange=function(){updateQty(t,i,this.value);};})(type,idx);
+    var rb=document.createElement('button');rb.className='remove-btn';rb.textContent='Remove';
+    (function(t,i){rb.onclick=function(){removeItem(t,i);};})(type,idx);
+    row.appendChild(nm);row.appendChild(qi);row.appendChild(rb);el.appendChild(row);
+  });
+}
+
+function clearAll(){
+  lists={consume:[],produce:[],dismantle:[],recover:[]};
+  ['consume','produce','dismantle','recover'].forEach(renderList);
+  document.getElementById('inp-notes').value='';
+  document.getElementById('sel-location').value='';
+  document.getElementById('sel-who').value='';
+  hideBanners();
+}
+
+function hideBanners(){['success','error','warning'].forEach(function(t){document.getElementById('banner-'+t).style.display='none';});}
+
+function showBanner(type,msg){
+  hideBanners();
+  var el=document.getElementById('banner-'+type);
+  el.textContent=msg;el.style.display='block';
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function submitRun(){
+  var location=document.getElementById('sel-location').value;
+  var who=document.getElementById('sel-who').value;
+  if(!location){showBanner('error','Select a location.');return;}
+  if(!who){showBanner('error','Select who ran this.');return;}
+  var consume=currentMode==='build'?lists.consume:lists.dismantle;
+  var produce=currentMode==='build'?lists.produce:lists.recover;
+  if(!consume.length&&!produce.length){showBanner('error','Add at least one product or component.');return;}
+  var btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Saving...';
+  var payload={
+    action:'logProduction',mode:currentMode==='build'?'Build':'Dismantle',
+    date:new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}),
+    location:location,who:who,notes:document.getElementById('inp-notes').value.trim(),
+    consume:consume.map(function(i){return{name:i.name,sku:i.sku,qty:i.qty};}),
+    produce:produce.map(function(i){return{name:i.name,sku:i.sku,qty:i.qty};})
+  };
+  fetch(API+'?payload='+encodeURIComponent(JSON.stringify(payload)))
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.success){
+        var entry=JSON.parse(JSON.stringify(payload));
+        entry.ts=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});
+        logs.unshift(entry);renderLog();
+        var msg=payload.mode+' run logged — '+location+' — '+consume.length+' consumed, '+produce.length+' added.';
+        if(data.warnings&&data.warnings.length) msg+=' Note: '+data.warnings.join('; ');
+        showBanner(data.warnings&&data.warnings.length?'warning':'success',msg);
+        lists={consume:[],produce:[],dismantle:[],recover:[]};
+        ['consume','produce','dismantle','recover'].forEach(renderList);
+        document.getElementById('inp-notes').value='';
+      }else{showBanner('error','Error: '+(data.error||'Unknown error'));}
+    })
+    .catch(function(){showBanner('error','Could not reach Google Sheet. Check your internet.');})
+    .finally(function(){btn.disabled=false;btn.innerHTML='Log Production Run &#x2192; Google Sheet';});
+}
+
+function renderLog(){
+  var sec=document.getElementById('log-section'),list=document.getElementById('log-list');
+  if(!logs.length){sec.style.display='none';return;}
+  sec.style.display='';
+  list.innerHTML=logs.map(function(e){
+    return '<div class="log-entry">'
+      +'<div class="log-header">'
+      +'<span class="log-loc">'+e.location+'</span>'
+      +'<span class="badge badge-'+(e.mode==='Build'?'build':'dismantle')+'">'+e.mode+'</span>'
+      +'<span class="badge badge-who">'+e.who+'</span>'
+      +(e.notes?'<span class="badge badge-note">'+e.notes+'</span>':'')
+      +'<span class="badge badge-saved">Saved</span>'
+      +'<span class="log-time">'+e.ts+'</span>'
+      +'</div>'
+      +(e.consume.length?'<div class="log-sl c">Consumed</div>'+e.consume.map(function(i){return '<div class="log-item"><span>'+i.name+'</span><span class="log-item-qty">&#x2212; '+i.qty+'</span></div>';}).join(''):'')
+      +(e.produce.length?'<div class="log-sl p">Added</div>'+e.produce.map(function(i){return '<div class="log-item"><span>'+i.name+'</span><span class="log-item-qty">+ '+i.qty+'</span></div>';}).join(''):'')
+      +'</div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
