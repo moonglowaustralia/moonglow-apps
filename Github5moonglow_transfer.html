@@ -70,7 +70,6 @@
   .pending-item { display: flex; justify-content: space-between; font-size: 13px; color: #555; padding: 3px 0; border-bottom: 1px solid #F5F0E8; }
   .pending-item:last-child { border-bottom: none; }
   .pending-item-qty { font-weight: 600; color: #1A1A2E; }
-
   .pending-empty { text-align: center; color: #bbb; font-size: 13px; padding: 12px 0; }
   .log-section { margin-top: 8px; }
   .log-title { font-size: 11px; font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
@@ -138,7 +137,7 @@
     <div class="card-title">Add Products</div>
     <div class="search-wrap">
       <span class="search-icon">&#x1F50D;</span>
-      <input type="text" id="inp-search" placeholder="Loading products..." autocomplete="off" id="inp-search">
+      <input type="text" id="inp-search" placeholder="Loading products..." autocomplete="off">
       <div class="dropdown" id="dd"></div>
     </div>
     <div class="items-list" id="items-list">
@@ -169,22 +168,23 @@
 <script>
 var API = "https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec";
 
-// State
-var allProducts = [];  // [{name:'...', sku:'...'}]
-var items = [];        // [{name:'...', sku:'...', qty:1}]
+var allProducts = [];
+var items = [];
 var logs = [];
 var fromStock = {};
 var toStock = {};
 
 document.getElementById('today-chip').textContent = new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
 
-// ── Load products ─────────────────────────────────────────────────
-fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getProducts'})))
-  .then(function(r){return r.json();})
+// ── Load products using correct action parameter ──────────────────
+fetch(API + '?action=getProducts')
+  .then(function(r){ return r.json(); })
   .then(function(d){
     if (d && d.products) {
-      allProducts = d.products; // [{name, sku}]
+      allProducts = d.products;
       document.getElementById('inp-search').placeholder = 'Search by name or SKU... (' + allProducts.length + ' products)';
+    } else {
+      document.getElementById('inp-search').placeholder = 'Search by name or SKU...';
     }
   })
   .catch(function(){
@@ -203,14 +203,14 @@ function onLocationChange() {
 
   var promises = [];
   if (from) promises.push(
-    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:from})))
-      .then(function(r){return r.json();})
-      .then(function(d){if(d&&d.stock) fromStock=d.stock;})
+    fetch(API + '?action=getLocationStock&location=' + encodeURIComponent(from))
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d && d.stock) fromStock = d.stock; })
   );
   if (to) promises.push(
-    fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getLocationStock',location:to})))
-      .then(function(r){return r.json();})
-      .then(function(d){if(d&&d.stock) toStock=d.stock;})
+    fetch(API + '?action=getLocationStock&location=' + encodeURIComponent(to))
+      .then(function(r){ return r.json(); })
+      .then(function(d){ if(d && d.stock) toStock = d.stock; })
   );
 
   Promise.all(promises).then(function(){
@@ -256,7 +256,6 @@ inpSearch.addEventListener('input', function(){
       div.appendChild(skuDiv);
     }
 
-    // Stock chips
     var from = document.getElementById('sel-from').value;
     var to   = document.getElementById('sel-to').value;
     if ((from && Object.keys(fromStock).length) || (to && Object.keys(toStock).length)) {
@@ -288,7 +287,6 @@ inpSearch.addEventListener('input', function(){
         };
       })(product));
     }
-
     ddEl.appendChild(div);
   });
   ddEl.classList.add('open');
@@ -306,15 +304,8 @@ function addItem(name, sku) {
   renderItems();
 }
 
-function removeItem(idx) {
-  items.splice(idx, 1);
-  renderItems();
-}
-
-function setQty(idx, val) {
-  var n = parseInt(val);
-  if (n > 0) items[idx].qty = n;
-}
+function removeItem(idx) { items.splice(idx, 1); renderItems(); }
+function setQty(idx, val) { var n = parseInt(val); if (n > 0) items[idx].qty = n; }
 
 function renderItems() {
   var list = document.getElementById('items-list');
@@ -333,23 +324,18 @@ function renderItems() {
   items.forEach(function(item, idx) {
     var row = document.createElement('div');
     row.className = 'item-row';
-
     var info = document.createElement('div');
     info.className = 'item-info';
-
     var nameEl = document.createElement('div');
     nameEl.className = 'item-name';
     nameEl.textContent = item.name;
     info.appendChild(nameEl);
-
     if (item.sku) {
       var skuEl = document.createElement('div');
       skuEl.className = 'item-meta';
       skuEl.textContent = item.sku;
       info.appendChild(skuEl);
     }
-
-    // Stock chips
     if ((from && Object.keys(fromStock).length) || (to && Object.keys(toStock).length)) {
       var chipsDiv = document.createElement('div');
       chipsDiv.className = 'item-chips';
@@ -369,19 +355,16 @@ function renderItems() {
       }
       info.appendChild(chipsDiv);
     }
-
     var qtyInput = document.createElement('input');
     qtyInput.type = 'number';
     qtyInput.className = 'item-qty';
     qtyInput.value = item.qty;
     qtyInput.min = 1;
     (function(i){ qtyInput.onchange = function(){ setQty(i, this.value); }; })(idx);
-
     var rmBtn = document.createElement('button');
     rmBtn.className = 'remove-btn';
     rmBtn.textContent = '\u2715';
     (function(i){ rmBtn.onclick = function(){ removeItem(i); }; })(idx);
-
     row.appendChild(info);
     row.appendChild(qtyInput);
     row.appendChild(rmBtn);
@@ -426,6 +409,7 @@ function submitTransfer() {
   btn.innerHTML = '<span class="spinner"></span>Saving...';
 
   var payload = {
+    action: 'logTransfer',
     date: new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short',year:'numeric'}),
     from: from, to: to, who: who,
     notes: document.getElementById('inp-notes').value.trim(),
@@ -456,7 +440,7 @@ function submitTransfer() {
 
 // ── Pending transfers ─────────────────────────────────────────────
 function loadPending() {
-  fetch(API + '?payload=' + encodeURIComponent(JSON.stringify({action:'getPendingTransfers'})))
+  fetch(API + '?action=getPendingTransfers')
     .then(function(r){ return r.json(); })
     .then(function(d){ if (d && d.transfers) renderPending(d.transfers); })
     .catch(function(){});
@@ -467,7 +451,6 @@ function renderPending(transfers) {
   var list = document.getElementById('pending-list');
   document.getElementById('pending-count').textContent = transfers.length;
   list.innerHTML = '';
-
   if (!transfers.length) {
     var em = document.createElement('div');
     em.className = 'pending-empty';
@@ -475,11 +458,9 @@ function renderPending(transfers) {
     list.appendChild(em);
     return;
   }
-
   transfers.forEach(function(t) {
     var card = document.createElement('div');
     card.className = 'pending-card';
-
     var header = document.createElement('div');
     header.className = 'pending-header';
     var route = document.createElement('span');
@@ -500,7 +481,6 @@ function renderPending(transfers) {
       header.appendChild(note);
     }
     header.appendChild(meta);
-
     var itemsDiv = document.createElement('div');
     itemsDiv.className = 'pending-items';
     t.items.forEach(function(i){
@@ -511,7 +491,6 @@ function renderPending(transfers) {
       row.appendChild(nm); row.appendChild(qty);
       itemsDiv.appendChild(row);
     });
-
     var note = document.createElement('div');
     note.style.cssText = 'font-size:11px;color:#999;margin-top:8px;font-style:italic;';
     note.textContent = 'Mark as Done in the Transfer Log tab in Google Sheets';
@@ -521,8 +500,6 @@ function renderPending(transfers) {
     list.appendChild(card);
   });
 }
-
-
 
 // ── Log ───────────────────────────────────────────────────────────
 function renderLog() {
