@@ -415,29 +415,12 @@ async function submitToSheet() {
   btn.disabled = true;
 
   var itemsToLog = salesData.map(function(item) {
-    var componentsStr = '';
-    try {
-      var comps = item.components;
-      if (!comps) {
-        componentsStr = '';
-      } else if (typeof comps === 'string') {
-        componentsStr = comps;
-      } else if (typeof comps.length !== 'undefined') {
-        var parts = [];
-        for (var ci = 0; ci < comps.length; ci++) {
-          var c = comps[ci];
-          if (typeof c === 'string') parts.push(c);
-          else if (c && c.sku) parts.push(c.sku + (c.qty > 1 ? ' x' + c.qty : ''));
-        }
-        componentsStr = parts.join(', ');
-      }
-    } catch(ce) { componentsStr = ''; }
     return {
       date: item.date ? item.date.substring(0, 10) : new Date().toLocaleDateString(),
       orderNumber: item.orderNumber || '',
       productName: item.productName || '',
       sku: item.sku || '',
-      components: componentsStr,
+      components: item.componentsStr || '',
       qty: item.qty || 1
     };
   });
