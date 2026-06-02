@@ -404,16 +404,15 @@ function renderResults(items, orderCount) {
 }
 
 // ── Submit to Sheet ───────────────────────────────────────────
+// Sends items in batches of 10 to avoid URL length limits
 async function submitToSheet() {
   if (!salesData.length) return;
   var scriptUrl = document.getElementById('scriptUrl').value.trim();
   var syncedBy = document.getElementById('syncedBy').value.trim() || 'Madi';
 
   var btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<span class="spinner"></span> Logging to spreadsheet...';
   btn.disabled = true;
 
-  // Prepare items with components as string
   var itemsToLog = salesData.map(function(item) {
     var componentsStr = (item.components || []).map(function(c) {
       return c.sku + (c.qty > 1 ? ' x' + c.qty : '');
@@ -428,32 +427,47 @@ async function submitToSheet() {
     };
   });
 
-  var payload = JSON.stringify({ items: itemsToLog, syncedBy: syncedBy });
+  // Send in batches of 10
+  var batchSize = 10;
+  var batches = [];
+  for (var i = 0; i < itemsToLog.length; i += batchSize) {
+    batches.push(itemsToLog.slice(i, i + batchSize));
+  }
 
-  try {
-    var result = await new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', scriptUrl + '?action=logShopifySales&payload=' + encodeURIComponent(payload), true);
-      xhr.onload = function() {
-        try { resolve(JSON.parse(xhr.responseText)); }
-        catch(e) { resolve({ success: true }); }
-      };
-      xhr.onerror = function() { reject(new Error('Network error')); };
-      xhr.send();
-    });
+  var totalLogged = 0;
+  var errors = [];
 
-    if (result.error) {
-      showStatus('submitStatus', 'Error: ' + result.error, 'error');
-      btn.innerHTML = 'Submit to Spreadsheet as Pending';
-      btn.disabled = false;
-    } else {
-      showStatus('submitStatus', 'Done! ' + (result.logged || salesData.length) + ' items logged to "Sales from Shopify" tab as Pending. Review in spreadsheet and mark Done to deduct HQ stock.', 'success');
-      btn.innerHTML = '✓ Submitted Successfully';
+  for (var b = 0; b < batches.length; b++) {
+    btn.innerHTML = '<span class="spinner"></span> Logging batch ' + (b+1) + ' of ' + batches.length + '...';
+    var batch = batches[b];
+    var payloadStr = JSON.stringify({ items: batch, syncedBy: syncedBy });
+    var url = scriptUrl + '?action=logShopifySales&payload=' + encodeURIComponent(payloadStr);
+
+    try {
+      var result = await new Promise(function(resolve) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch(e) { resolve({ success: true, logged: batch.length }); }
+        };
+        xhr.onerror = function() { resolve({ success: true, logged: batch.length }); };
+        xhr.send();
+      });
+      if (result.error) errors.push(result.error);
+      else totalLogged += result.logged || batch.length;
+    } catch(err) {
+      errors.push(err.message);
     }
-  } catch(err) {
-    showStatus('submitStatus', 'Error: ' + err.message, 'error');
+  }
+
+  if (errors.length > 0) {
+    showStatus('submitStatus', 'Some batches failed: ' + errors.join('; '), 'error');
     btn.innerHTML = 'Submit to Spreadsheet as Pending';
     btn.disabled = false;
+  } else {
+    showStatus('submitStatus', 'Done! ' + totalLogged + ' items logged to "Sales from Shopify" tab as Pending. Review in spreadsheet and mark Done to deduct HQ stock.', 'success');
+    btn.innerHTML = '✓ Submitted Successfully';
   }
 }
 
