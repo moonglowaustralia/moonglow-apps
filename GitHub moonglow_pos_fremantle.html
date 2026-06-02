@@ -386,7 +386,8 @@ function addToCart() {
       sku: selectedProduct.sku || "",
       category: selectedTileName,
       qty: qty,
-      imageURL: selectedProduct.imageURL || ""
+      imageURL: selectedProduct.imageURL || "",
+      inventoryName: selectedProduct.inventoryName || ""
     });
   }
   updateCartBadge();
@@ -489,7 +490,8 @@ function submitCart(paymentMethod) {
       category: item.category,
       quantity: item.qty,
       payment: paymentMethod,
-      timestamp: timestamp
+      timestamp: timestamp,
+      inventoryName: item.inventoryName || ""
     });
     return fetch(SCRIPT_URL + "?" + params.toString()).then(r => r.json());
   });
