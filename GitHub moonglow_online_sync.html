@@ -414,9 +414,15 @@ async function submitToSheet() {
   btn.disabled = true;
 
   var itemsToLog = salesData.map(function(item) {
-    var componentsStr = (item.components || []).map(function(c) {
-      return c.sku + (c.qty > 1 ? ' x' + c.qty : '');
-    }).join(', ');
+    // components may be array of objects or already a string
+    var componentsStr = '';
+    if (Array.isArray(item.components)) {
+      componentsStr = item.components.map(function(c) {
+        return c.sku + (c.qty > 1 ? ' x' + c.qty : '');
+      }).join(', ');
+    } else if (typeof item.components === 'string') {
+      componentsStr = item.components;
+    }
     return {
       date: item.date ? item.date.substring(0, 10) : new Date().toLocaleDateString(),
       orderNumber: item.orderNumber || '',
