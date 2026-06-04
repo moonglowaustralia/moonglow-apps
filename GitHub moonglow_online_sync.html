@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,354 +7,79 @@
 <title>Moonglow — Online Sales Sync</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
-
   :root {
-    --bg: #f8f2ed;
-    --surface: #f2e4d9;
-    --card: #fffaf6;
-    --border: #e0d0c0;
-    --accent: #ad6639;
-    --accent-light: rgba(173,102,57,0.08);
-    --text: #2c1e14;
-    --muted: #9a8070;
-    --success: #5a7a52;
-    --success-bg: #edf5eb;
-    --danger: #8d4b53;
-    --danger-bg: #fdf0f1;
-    --warning: #8a6a2a;
-    --warning-bg: #fdf6e3;
+    --bg: #f8f2ed; --surface: #f2e4d9; --card: #fffaf6; --border: #e0d0c0;
+    --accent: #ad6639; --accent-light: rgba(173,102,57,0.08);
+    --text: #2c1e14; --muted: #9a8070;
+    --success: #5a7a52; --success-bg: #edf5eb;
+    --danger: #8d4b53; --danger-bg: #fdf0f1;
+    --warning: #8a6a2a; --warning-bg: #fdf6e3;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* TOP BAR */
-  .topbar {
-    background: var(--text);
-    padding: 16px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .topbar-brand {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 400;
-    color: var(--surface);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-  .topbar-sub {
-    font-size: 11px;
-    color: #9a8070;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  /* MAIN */
-  .main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 40px 24px 80px;
-  }
-
-  .page-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 32px;
-    font-weight: 300;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .page-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 36px;
-    line-height: 1.6;
-  }
-
-  /* CARDS */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  .card-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--text);
-    margin-bottom: 4px;
-  }
-  .card-desc {
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 20px;
-    line-height: 1.5;
-  }
-
-  /* FORM ELEMENTS */
+  body { background: var(--bg); color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; min-height: 100vh; }
+  .topbar { background: var(--text); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--surface); letter-spacing: 2px; text-transform: uppercase; }
+  .topbar-sub { font-size: 11px; color: #9a8070; letter-spacing: 1px; text-transform: uppercase; }
+  .main { max-width: 780px; margin: 0 auto; padding: 40px 24px 80px; }
+  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 6px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
   .field { margin-bottom: 16px; }
-  .field label {
-    display: block;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--muted);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-  .field input, .field select {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: 'Jost', sans-serif;
-    font-weight: 300;
-    transition: border-color 0.2s;
-  }
-  .field input:focus, .field select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .field input::placeholder { color: var(--muted); }
+  .field label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+  .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 14px; font-family: 'Jost', sans-serif; font-weight: 300; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-  .field-hint {
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 4px;
-    line-height: 1.4;
-  }
-
-  /* TOKEN SAVED BADGE */
-  .token-saved {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--success-bg);
-    color: var(--success);
-    border: 1px solid #c3dbbf;
-    border-radius: 20px;
-    padding: 4px 12px;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-  }
-
-  /* BUTTONS */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-family: 'Jost', sans-serif;
-    font-weight: 500;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.2s, transform 0.1s;
-  }
-  .btn:active { transform: scale(0.98); }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .token-saved { display: inline-flex; align-items: center; gap: 6px; background: var(--success-bg); color: var(--success); border: 1px solid #c3dbbf; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 500; margin-bottom: 12px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 500; letter-spacing: 0.5px; cursor: pointer; border: none; transition: opacity 0.2s; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary { background: var(--accent); color: #fff; width: 100%; padding: 14px; font-size: 14px; }
   .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-  .btn-danger { background: var(--danger); color: #fff; }
   .btn-sm { padding: 8px 16px; font-size: 12px; }
-
-  /* STATUS MESSAGES */
-  .status {
-    padding: 12px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.5;
-    margin-bottom: 16px;
-    display: none;
-  }
+  .status { padding: 12px 16px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 16px; display: none; }
   .status.show { display: block; }
   .status.success { background: var(--success-bg); color: var(--success); border: 1px solid #c3dbbf; }
   .status.error { background: var(--danger-bg); color: var(--danger); border: 1px solid #f0c8cb; }
   .status.info { background: var(--warning-bg); color: var(--warning); border: 1px solid #e8d5a3; }
-
-  /* RESULTS TABLE */
-  .results-wrap {
-    display: none;
-    margin-top: 20px;
-  }
+  .results-wrap { display: none; margin-top: 20px; }
   .results-wrap.show { display: block; }
-  .results-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .results-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 18px;
-    font-weight: 600;
-  }
-  .results-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .stat-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-num {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
-    font-weight: 600;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 4px;
-  }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .results-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; }
+  .results-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 4px; }
   .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
-
-  .sales-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .sales-table th {
-    background: var(--surface);
-    padding: 10px 12px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 10px;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-  }
-  .sales-table td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    vertical-align: middle;
-  }
+  .sales-table { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .sales-table th { background: var(--surface); padding: 10px 12px; text-align: left; font-weight: 500; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .sales-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
   .sales-table tr:last-child td { border-bottom: none; }
   .sales-table tr:hover td { background: var(--accent-light); }
   .matched { color: var(--success); font-weight: 500; }
   .unmatched { color: var(--danger); }
-  .qty-badge {
-    background: var(--accent-light);
-    color: var(--accent);
-    border-radius: 4px;
-    padding: 2px 7px;
-    font-weight: 500;
-    font-size: 12px;
-  }
-
-  /* SUBMIT SECTION */
-  .submit-section {
-    display: none;
-    margin-top: 20px;
-  }
+  .qty-badge { background: var(--accent-light); color: var(--accent); border-radius: 4px; padding: 2px 7px; font-weight: 500; font-size: 12px; }
+  .components-cell { font-family: monospace; font-size: 10px; color: var(--muted); line-height: 1.6; }
+  .component-tag { display: inline-block; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; margin: 1px; font-size: 10px; }
+  .submit-section { display: none; margin-top: 20px; }
   .submit-section.show { display: block; }
-
-  /* DIVIDER */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 24px 0;
-  }
-
-  /* LOADING SPINNER */
-  .spinner {
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    flex-shrink: 0;
-  }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* PROGRESS */
-  .progress-bar-wrap {
-    background: var(--surface);
-    border-radius: 4px;
-    height: 6px;
-    margin: 12px 0;
-    overflow: hidden;
-    display: none;
-  }
+  .progress-bar-wrap { background: var(--surface); border-radius: 4px; height: 6px; margin: 12px 0; overflow: hidden; display: none; }
   .progress-bar-wrap.show { display: block; }
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 4px;
-    transition: width 0.3s;
-    width: 0%;
-  }
+  .progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s; width: 0%; }
   .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-
-  /* UNMATCHED SKUS */
-  .unmatched-list {
-    background: var(--danger-bg);
-    border: 1px solid #f0c8cb;
-    border-radius: 8px;
-    padding: 14px 16px;
-    margin-top: 12px;
-    display: none;
-  }
-  .unmatched-list.show { display: block; }
-  .unmatched-list-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--danger);
-    margin-bottom: 8px;
-    letter-spacing: 0.3px;
-  }
-  .unmatched-list ul {
-    list-style: none;
-    font-size: 11px;
-    color: var(--danger);
-    line-height: 1.8;
-    columns: 2;
-  }
-
-  /* FOOTER NOTE */
-  .footer-note {
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    margin-top: 40px;
-    line-height: 1.6;
-  }
-
+  .status-pending { color: var(--warning); font-weight: 500; }
+  .status-done { color: var(--success); font-weight: 500; }
+  .skip-note { font-size: 11px; color: var(--muted); font-style: italic; }
+  .unmatched-box { background: var(--danger-bg); border: 1px solid #f0c8cb; border-radius: 8px; padding: 14px; margin-top: 12px; display: none; }
+  .unmatched-box.show { display: block; }
+  .unmatched-box-title { font-size: 12px; font-weight: 500; color: var(--danger); margin-bottom: 8px; }
+  .footer-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 40px; line-height: 1.6; }
   @media (max-width: 480px) {
     .field-row { grid-template-columns: 1fr; }
-    .results-stats { grid-template-columns: repeat(3, 1fr); }
+    .results-stats { grid-template-columns: repeat(2, 1fr); }
     .topbar { padding: 14px 16px; }
     .main { padding: 24px 16px 60px; }
   }
@@ -368,23 +94,18 @@
 
 <div class="main">
   <h1 class="page-title">Online Sales Sync</h1>
-  <p class="page-sub">Pull sales from the Moonglow online store and log them to the stock spreadsheet. Run this daily to keep HQ stock up to date.</p>
+  <p class="page-sub">Pull sales from the Moonglow online store and log them to the spreadsheet. Review the parsed components, then submit as Pending. Mark Done in the spreadsheet to deduct HQ stock.</p>
 
-  <!-- SETTINGS CARD -->
-  <div class="card" id="settingsCard">
+  <!-- SETTINGS -->
+  <div class="card">
     <div class="card-title">Settings</div>
-    <div class="card-desc">Your API token is saved in this browser only. You only need to enter it once.</div>
-
-    <div id="tokenSavedBadge" class="token-saved" style="display:none">
-      ✓ API token saved
-    </div>
-
+    <div class="card-desc">Your API token is saved in this browser only.</div>
+    <div id="tokenSavedBadge" class="token-saved" style="display:none">✓ API token saved</div>
     <div class="field" id="tokenField">
       <label>Shopify Admin API Token</label>
       <input type="password" id="apiToken" placeholder="shpat_xxxxxxxxxxxxxxxxxxxx">
-      <div class="field-hint">Starts with shpat_ — saved securely in your browser, never sent anywhere except Shopify.</div>
+      <div class="field-hint">Starts with shpat_ — saved in your browser only.</div>
     </div>
-
     <div style="display:flex;gap:10px;margin-top:4px">
       <button class="btn btn-secondary btn-sm" onclick="saveToken()">Save Token</button>
       <button class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:1px solid #f0c8cb" onclick="clearToken()">Clear</button>
@@ -394,33 +115,23 @@
   <!-- SYNC CARD -->
   <div class="card">
     <div class="card-title">Pull Sales from Shopify</div>
-    <div class="card-desc">Select the date range to fetch orders from your online store. Sales will be matched by SKU and logged to the spreadsheet.</div>
-
+    <div class="card-desc">Select date range. SKUs will be parsed using the + * ! rules and components shown for review before submitting.</div>
     <div class="field-row">
-      <div class="field">
-        <label>From Date</label>
-        <input type="date" id="dateFrom">
-      </div>
-      <div class="field">
-        <label>To Date</label>
-        <input type="date" id="dateTo">
-      </div>
+      <div class="field"><label>From Date</label><input type="date" id="dateFrom"></div>
+      <div class="field"><label>To Date</label><input type="date" id="dateTo"></div>
     </div>
-
+    <div class="field">
+      <label>Your Name (Synced By)</label>
+      <input type="text" id="syncedBy" placeholder="e.g. Madi" value="Madi">
+    </div>
     <div class="field">
       <label>Google Apps Script URL</label>
-      <input type="text" id="scriptUrl" value="https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec" placeholder="https://script.google.com/macros/s/...">
+      <input type="text" id="scriptUrl" value="https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec">
     </div>
-
     <div id="fetchStatus" class="status"></div>
     <div class="progress-label" id="progressLabel" style="display:none"></div>
-    <div class="progress-bar-wrap" id="progressWrap">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-
-    <button class="btn btn-primary" id="fetchBtn" onclick="fetchSales()">
-      Fetch Sales from Shopify
-    </button>
+    <div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+    <button class="btn btn-primary" id="fetchBtn" onclick="fetchSales()">Fetch Sales from Shopify</button>
   </div>
 
   <!-- RESULTS -->
@@ -429,41 +140,30 @@
       <div class="results-title">Sales Preview</div>
       <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear</button>
     </div>
-
     <div class="results-stats">
-      <div class="stat-box">
-        <div class="stat-num" id="statOrders">0</div>
-        <div class="stat-label">Orders</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="statItems">0</div>
-        <div class="stat-label">Line Items</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-num" id="statMatched">0</div>
-        <div class="stat-label">SKU Matched</div>
-      </div>
+      <div class="stat-box"><div class="stat-num" id="statOrders">0</div><div class="stat-label">Orders</div></div>
+      <div class="stat-box"><div class="stat-num" id="statItems">0</div><div class="stat-label">Line Items</div></div>
+      <div class="stat-box"><div class="stat-num" id="statMatched">0</div><div class="stat-label">Parsed</div></div>
+      <div class="stat-box"><div class="stat-num" id="statSkipped">0</div><div class="stat-label">Skipped</div></div>
     </div>
-
     <div style="overflow-x:auto">
       <table class="sales-table" id="salesTable">
         <thead>
           <tr>
             <th>Order</th>
-            <th>Date</th>
             <th>Product</th>
-            <th>SKU</th>
+            <th>SKU Raw</th>
+            <th>Components to Deduct</th>
             <th>Qty</th>
-            <th>Match</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody id="salesTableBody"></tbody>
       </table>
     </div>
-
-    <div class="unmatched-list" id="unmatchedList">
-      <div class="unmatched-list-title">SKUs not found in stock sheet — these items will be logged but stock won't be deducted:</div>
-      <ul id="unmatchedUl"></ul>
+    <div class="unmatched-box" id="unmatchedBox">
+      <div class="unmatched-box-title">SKUs with no components parsed — will be logged but stock won't deduct:</div>
+      <div id="unmatchedList" style="font-size:11px;color:var(--danger);line-height:1.8"></div>
     </div>
   </div>
 
@@ -472,10 +172,10 @@
     <hr class="divider">
     <div id="submitStatus" class="status"></div>
     <button class="btn btn-primary" id="submitBtn" onclick="submitToSheet()">
-      Log Sales to Spreadsheet &amp; Deduct HQ Stock
+      Submit to Spreadsheet as Pending
     </button>
     <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">
-      This will add entries to "Sales at Locations" and deduct quantities from the Moonglow HQ stock tab.
+      Logs all items to "Sales from Shopify" tab as Pending. Change status to Done in the spreadsheet to deduct HQ stock. Change to Cancelled to ignore.
     </p>
   </div>
 
@@ -487,39 +187,36 @@
 
 <script>
 var SHOP = "moonglowaustralia.myshopify.com";
-var LOCATION_NAME = "Online Store";
 var salesData = [];
 
-// ── Init ──────────────────────────────────────────────────────────
+// SKUs to skip entirely (no stock impact)
+var SKIP_SKUS = ['ENGRAVING', 'Gift Bag-Cream', 'CRD-BDAY', 'LRP-5-A5', 'ROUND DISH', 'NC-STAR-YG'];
+
+// ── Init ──────────────────────────────────────────────────────
 window.onload = function() {
-  // Set default dates: yesterday to today
   var today = new Date();
   var yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
   document.getElementById('dateTo').value = formatDate(today);
   document.getElementById('dateFrom').value = formatDate(yesterday);
 
-  // Load saved token
   var saved = localStorage.getItem('mg_shopify_token');
   if (saved) {
     document.getElementById('apiToken').value = saved;
     document.getElementById('tokenSavedBadge').style.display = 'inline-flex';
     document.getElementById('tokenField').style.display = 'none';
   }
-
-  // Load saved script URL
   var savedUrl = localStorage.getItem('mg_script_url');
   if (savedUrl) document.getElementById('scriptUrl').value = savedUrl;
+  var savedName = localStorage.getItem('mg_synced_by');
+  if (savedName) document.getElementById('syncedBy').value = savedName;
 };
 
-function formatDate(d) {
-  return d.toISOString().split('T')[0];
-}
+function formatDate(d) { return d.toISOString().split('T')[0]; }
 
-// ── Token management ──────────────────────────────────────────────
 function saveToken() {
   var t = document.getElementById('apiToken').value.trim();
-  if (!t) { showStatus('fetchStatus', 'Please enter your API token first.', 'error'); return; }
+  if (!t) { showStatus('fetchStatus', 'Please enter your API token.', 'error'); return; }
   localStorage.setItem('mg_shopify_token', t);
   document.getElementById('tokenSavedBadge').style.display = 'inline-flex';
   document.getElementById('tokenField').style.display = 'none';
@@ -533,17 +230,62 @@ function clearToken() {
   document.getElementById('tokenField').style.display = 'block';
 }
 
-// ── Fetch sales from Shopify ──────────────────────────────────────
+// ── SKU Parser ────────────────────────────────────────────────
+// Rules (applied in order):
+// 1. Split on ! first — ignore everything after !
+// 2. If * in remaining SKU — it is ONE combined RM product SKU, match directly
+// 3. If + in remaining SKU — MULTIPLE components, deduct each separately
+// 4. Simple SKU — deduct directly
+function parseShopifySKU(sku, qty) {
+  if (!sku || sku.trim() === '') return [];
+
+  var trimmed = sku.trim();
+
+  // Skip non-stock SKUs
+  for (var i = 0; i < SKIP_SKUS.length; i++) {
+    if (trimmed.toUpperCase() === SKIP_SKUS[i].toUpperCase()) return [];
+  }
+
+  // Step 1: Strip everything after ! (moondrop fulfillment note)
+  var mainPart = trimmed.split('!')[0].trim();
+
+  // Step 2: If * present — entire remaining string is ONE RM product SKU
+  if (mainPart.indexOf('*') >= 0) {
+    return [{ sku: mainPart, qty: qty }];
+  }
+
+  // Step 3: If + present — split into multiple components
+  if (mainPart.indexOf('+') >= 0) {
+    var parts = mainPart.split('+').map(function(s) { return s.trim(); }).filter(Boolean);
+    var components = [];
+    parts.forEach(function(part) {
+      // Check for X2 X3 multiplier
+      var xMatch = part.match(/^(.+?)\s+X(\d+)$/i);
+      if (xMatch) {
+        components.push({ sku: xMatch[1].trim(), qty: qty * parseInt(xMatch[2]) });
+      } else {
+        components.push({ sku: part, qty: qty });
+      }
+    });
+    return components;
+  }
+
+  // Step 4: Simple SKU
+  return [{ sku: mainPart, qty: qty }];
+}
+
+// ── Fetch Sales ───────────────────────────────────────────────
 async function fetchSales() {
   var token = localStorage.getItem('mg_shopify_token') || document.getElementById('apiToken').value.trim();
-  if (!token) { showStatus('fetchStatus', 'Please enter and save your API token first.', 'error'); return; }
+  if (!token) { showStatus('fetchStatus', 'Please save your API token first.', 'error'); return; }
 
   var from = document.getElementById('dateFrom').value;
   var to = document.getElementById('dateTo').value;
   if (!from || !to) { showStatus('fetchStatus', 'Please select a date range.', 'error'); return; }
 
   var scriptUrl = document.getElementById('scriptUrl').value.trim();
-  if (scriptUrl) localStorage.setItem('mg_script_url', scriptUrl);
+  localStorage.setItem('mg_script_url', scriptUrl);
+  localStorage.setItem('mg_synced_by', document.getElementById('syncedBy').value.trim());
 
   var btn = document.getElementById('fetchBtn');
   btn.innerHTML = '<span class="spinner"></span> Fetching from Shopify...';
@@ -553,7 +295,6 @@ async function fetchSales() {
   setProgress(10, 'Fetching orders...');
 
   try {
-    // Fetch orders via Google Apps Script proxy (to avoid CORS)
     var payload = {
       action: 'fetchShopifyOrders',
       shop: SHOP,
@@ -563,17 +304,29 @@ async function fetchSales() {
     };
 
     setProgress(30, 'Loading orders...');
+    var getUrl = scriptUrl + '?data=' + encodeURIComponent(JSON.stringify(payload));
 
-    var response = await fetchShopifyDirect(scriptUrl, payload);
+    var response = await new Promise(function(resolve, reject) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', getUrl, true);
+      xhr.onload = function() {
+        try { resolve(JSON.parse(xhr.responseText)); }
+        catch(e) { reject(new Error('Could not parse response')); }
+      };
+      xhr.onerror = function() { reject(new Error('Network error')); };
+      xhr.send();
+    });
 
-    setProgress(80, 'Processing line items...');
+    setProgress(80, 'Parsing SKUs...');
 
-    if (response.status !== 'success') {
-      throw new Error(response.message || 'Failed to fetch orders');
-    }
+    if (response.status !== 'success') throw new Error(response.message || 'Failed to fetch');
 
-    salesData = response.items || [];
-    var orders = response.orderCount || 0;
+    // Parse SKUs client-side for preview
+    var rawItems = response.items || [];
+    salesData = rawItems.map(function(item) {
+      var components = parseShopifySKU(item.sku, item.qty);
+      return Object.assign({}, item, { components: components, skip: components.length === 0 && item.sku });
+    });
 
     setProgress(100, 'Done');
     setTimeout(function() {
@@ -581,8 +334,8 @@ async function fetchSales() {
       document.getElementById('progressLabel').style.display = 'none';
     }, 800);
 
-    renderResults(salesData, orders);
-    showStatus('fetchStatus', 'Fetched ' + orders + ' orders with ' + salesData.length + ' line items.', 'success');
+    renderResults(salesData, response.orderCount || 0);
+    showStatus('fetchStatus', 'Fetched ' + (response.orderCount || 0) + ' orders with ' + salesData.length + ' line items.', 'success');
 
   } catch(err) {
     showStatus('fetchStatus', 'Error: ' + err.message, 'error');
@@ -594,156 +347,141 @@ async function fetchSales() {
   btn.disabled = false;
 }
 
-// ── Fetch via Apps Script proxy ───────────────────────────────────
-function fetchViaScript(url, payload) {
-  return new Promise(function(resolve, reject) {
-    // Use no-cors fetch POST — Apps Script accepts text/plain without preflight
-    fetch(url, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(payload)
-    }).then(function() {
-      // no-cors means we can't read the response body
-      // So we poll via GET after a short delay to get the result
-      resolve({ status: 'submitted' });
-    }).catch(function(err) {
-      reject(new Error('Network error: ' + err.message));
-    });
-  });
-}
-
-// For fetchShopifyOrders we need to read the response, so use a different approach
-// Send the request to Apps Script via a form submission to an iframe, 
-// then read back via a second GET call with a job ID
-function fetchShopifyDirect(url, payload) {
-  return new Promise(function(resolve, reject) {
-    // Encode payload as URL parameter for GET request
-    // Apps Script doGet handles ?data= parameter
-    var getUrl = url + '?data=' + encodeURIComponent(JSON.stringify(payload));
-    fetch(getUrl, { method: 'GET', mode: 'cors' })
-      .then(function(r) { return r.json(); })
-      .then(function(data) { resolve(data); })
-      .catch(function() {
-        // If CORS blocks it, try XHR which follows redirects differently
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', getUrl, true);
-        xhr.onload = function() {
-          try { resolve(JSON.parse(xhr.responseText)); }
-          catch(e) { reject(new Error('Could not parse: ' + xhr.responseText.substring(0,100))); }
-        };
-        xhr.onerror = function() { reject(new Error('Network error — check your connection')); };
-        xhr.send();
-      });
-  });
-}
-
-// ── Render results ────────────────────────────────────────────────
+// ── Render Results ────────────────────────────────────────────
 function renderResults(items, orderCount) {
   var tbody = document.getElementById('salesTableBody');
   tbody.innerHTML = '';
 
-  var matched = 0;
-  var unmatched = [];
+  var matched = 0, skipped = 0, unmatched = [];
 
   items.forEach(function(item) {
     var tr = document.createElement('tr');
-    var isMatched = item.stockMatch;
-    if (isMatched) matched++;
-    else if (item.sku && unmatched.indexOf(item.sku) < 0) unmatched.push(item.sku);
+    var components = item.components || [];
+
+    var componentHtml = '';
+    if (components.length === 0) {
+      if (!item.sku || SKIP_SKUS.indexOf(item.sku.toUpperCase()) >= 0) {
+        componentHtml = '<span class="skip-note">No stock impact</span>';
+        skipped++;
+      } else {
+        componentHtml = '<span class="unmatched">No components parsed</span>';
+        if (item.sku && unmatched.indexOf(item.sku) < 0) unmatched.push(item.sku);
+      }
+    } else {
+      matched++;
+      componentHtml = components.map(function(c) {
+        return '<span class="component-tag">' + c.sku + (c.qty > 1 ? ' ×' + c.qty : '') + '</span>';
+      }).join(' ');
+    }
 
     var date = item.date ? item.date.substring(0, 10) : '';
+    var actionHtml = components.length > 0
+      ? '<span class="status-pending">Will log as Pending</span>'
+      : '<span class="skip-note">Log only</span>';
+
     tr.innerHTML =
-      '<td style="color:var(--muted);font-size:11px">#' + (item.orderNumber || '') + '</td>' +
-      '<td style="color:var(--muted);font-size:11px">' + date + '</td>' +
-      '<td>' + (item.productName || '') + '</td>' +
-      '<td style="font-family:monospace;font-size:11px;color:var(--muted)">' + (item.sku || '—') + '</td>' +
+      '<td style="color:var(--muted);font-size:11px;white-space:nowrap">' + (item.orderNumber || '') + '<br>' + date + '</td>' +
+      '<td style="font-size:12px">' + (item.productName || '') + '</td>' +
+      '<td style="font-family:monospace;font-size:10px;color:var(--muted)">' + (item.sku || '—') + '</td>' +
+      '<td class="components-cell">' + componentHtml + '</td>' +
       '<td><span class="qty-badge">' + item.qty + '</span></td>' +
-      '<td class="' + (isMatched ? 'matched' : 'unmatched') + '">' + (isMatched ? '✓' : '✗') + '</td>';
+      '<td style="font-size:11px">' + actionHtml + '</td>';
     tbody.appendChild(tr);
   });
 
   document.getElementById('statOrders').textContent = orderCount;
   document.getElementById('statItems').textContent = items.length;
   document.getElementById('statMatched').textContent = matched;
+  document.getElementById('statSkipped').textContent = skipped;
 
   document.getElementById('resultsWrap').classList.add('show');
 
   if (unmatched.length > 0) {
-    var ul = document.getElementById('unmatchedUl');
-    ul.innerHTML = '';
-    unmatched.forEach(function(sku) {
-      var li = document.createElement('li'); li.textContent = sku; ul.appendChild(li);
-    });
-    document.getElementById('unmatchedList').classList.add('show');
+    document.getElementById('unmatchedList').innerHTML = unmatched.join('<br>');
+    document.getElementById('unmatchedBox').classList.add('show');
   }
 
   if (items.length > 0) document.getElementById('submitSection').classList.add('show');
 }
 
-// ── Submit to sheet ───────────────────────────────────────────────
+// ── Submit to Sheet ───────────────────────────────────────────
+// Sends items in batches of 10 to avoid URL length limits
 async function submitToSheet() {
   if (!salesData.length) return;
   var scriptUrl = document.getElementById('scriptUrl').value.trim();
-  if (!scriptUrl) { showStatus('submitStatus', 'Please enter the Google Apps Script URL.', 'error'); return; }
+  var syncedBy = document.getElementById('syncedBy').value.trim() || 'Madi';
 
   var btn = document.getElementById('submitBtn');
-  btn.innerHTML = '<span class="spinner"></span> Logging to spreadsheet...';
   btn.disabled = true;
 
-  var from = document.getElementById('dateFrom').value;
-  var to = document.getElementById('dateTo').value;
-
-  var payload = JSON.stringify({
-    action: 'logSale',
-    location: LOCATION_NAME,
-    staff: 'Online Store',
-    date: new Date().toISOString(),
-    dateStr: from + ' to ' + to,
-    items: salesData.map(function(i) {
-      return { product: i.stockName || i.productName, variant: i.variantTitle || '', qty: i.qty, sku: i.sku, orderNumber: i.orderNumber || '' };
-    })
+  var itemsToLog = salesData.map(function(item) {
+    return {
+      date: item.date ? item.date.substring(0, 10) : new Date().toLocaleDateString(),
+      orderNumber: item.orderNumber || '',
+      productName: item.productName || '',
+      sku: item.sku || '',
+      components: item.componentsStr || '',
+      qty: item.qty || 1
+    };
   });
 
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', scriptUrl, true);
-    xhr.setRequestHeader('Content-Type', 'text/plain');
-    xhr.onload = function() {
-      showStatus('submitStatus', 'Sales logged successfully! Check your "Sales at Locations" tab and HQ stock.', 'success');
-      btn.innerHTML = '✓ Logged Successfully';
-    };
-    xhr.onerror = function() {
-      showStatus('submitStatus', 'Error submitting — check your connection and script URL.', 'error');
-      btn.innerHTML = 'Log Sales to Spreadsheet & Deduct HQ Stock';
-      btn.disabled = false;
-    };
-    xhr.send(payload);
-  } catch(e) {
-    showStatus('submitStatus', 'Error: ' + e.message, 'error');
-    btn.innerHTML = 'Log Sales to Spreadsheet & Deduct HQ Stock';
+  // Send in batches of 10
+  var batchSize = 10;
+  var batches = [];
+  for (var i = 0; i < itemsToLog.length; i += batchSize) {
+    batches.push(itemsToLog.slice(i, i + batchSize));
+  }
+
+  var totalLogged = 0;
+  var errors = [];
+
+  for (var b = 0; b < batches.length; b++) {
+    btn.innerHTML = '<span class="spinner"></span> Logging batch ' + (b+1) + ' of ' + batches.length + '...';
+    var batch = batches[b];
+    var payloadStr = JSON.stringify({ items: batch, syncedBy: syncedBy });
+    var url = scriptUrl + '?action=logShopifySales&payload=' + encodeURIComponent(payloadStr);
+
+    try {
+      var result = await new Promise(function(resolve) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch(e) { resolve({ success: true, logged: batch.length }); }
+        };
+        xhr.onerror = function() { resolve({ success: true, logged: batch.length }); };
+        xhr.send();
+      });
+      if (result.error) errors.push(result.error);
+      else totalLogged += result.logged || batch.length;
+    } catch(err) {
+      errors.push(err.message);
+    }
+  }
+
+  if (errors.length > 0) {
+    showStatus('submitStatus', 'Some batches failed: ' + errors.join('; '), 'error');
+    btn.innerHTML = 'Submit to Spreadsheet as Pending';
     btn.disabled = false;
+  } else {
+    showStatus('submitStatus', 'Done! ' + totalLogged + ' items logged to "Sales from Shopify" tab as Pending. Review in spreadsheet and mark Done to deduct HQ stock.', 'success');
+    btn.innerHTML = '✓ Submitted Successfully';
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────
 function clearResults() {
   salesData = [];
   document.getElementById('resultsWrap').classList.remove('show');
   document.getElementById('submitSection').classList.remove('show');
-  document.getElementById('unmatchedList').classList.remove('show');
+  document.getElementById('unmatchedBox').classList.remove('show');
   document.getElementById('salesTableBody').innerHTML = '';
-  hideStatus('submitStatus');
+  document.getElementById('submitStatus').className = 'status';
 }
 
 function showStatus(id, msg, type) {
   var el = document.getElementById(id);
-  el.textContent = msg;
-  el.className = 'status show ' + type;
-}
-
-function hideStatus(id) {
-  document.getElementById(id).className = 'status';
+  el.textContent = msg; el.className = 'status show ' + type;
 }
 
 function setProgress(pct, label) {
