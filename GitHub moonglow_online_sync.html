@@ -403,7 +403,7 @@ function submitSale(){
   var btn=document.getElementById('submitBtn');
   btn.textContent='Submitting...';btn.disabled=true;
   var payload=JSON.stringify({
-    action:'logSale',location:'Travel',show:show,staff:staff,
+    action:'logSale',location:show,staff:staff,
     date:new Date().toISOString(),dateStr:new Date().toLocaleDateString('en-AU'),
     items:cart.map(function(i){return {product:i.product,qty:i.qty};})
   });
