@@ -19,7 +19,6 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text-dark); min-height: 100vh; overflow-x: hidden; }
 
-  /* ── HEADER ── */
   .header { background: var(--terracotta); color: white; padding: 14px 16px 12px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-lg); }
   .header-left { display: flex; align-items: center; gap: 10px; }
   .back-btn { background: rgba(255,255,255,0.18); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; display: none; align-items: center; justify-content: center; }
@@ -27,46 +26,17 @@
   .header-title { font-size: 17px; font-weight: normal; letter-spacing: 0.5px; }
   .header-subtitle { font-size: 12px; opacity: 0.8; margin-top: 1px; }
 
-  /* ── CART BUTTON ── */
-  .cart-btn {
-    position: relative;
-    background: rgba(255,255,255,0.18);
-    border: none;
-    color: white;
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
+  .cart-btn { position: relative; background: rgba(255,255,255,0.18); border: none; color: white; width: 42px; height: 42px; border-radius: 50%; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .cart-btn:active { background: rgba(255,255,255,0.3); }
-  .cart-badge {
-    position: absolute;
-    top: -2px; right: -2px;
-    background: var(--burgundy);
-    color: white;
-    font-size: 10px;
-    font-family: -apple-system, sans-serif;
-    min-width: 18px; height: 18px;
-    border-radius: 9px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0 4px;
-    border: 2px solid var(--terracotta);
-  }
+  .cart-badge { position: absolute; top: -2px; right: -2px; background: var(--burgundy); color: white; font-size: 10px; font-family: -apple-system, sans-serif; min-width: 18px; height: 18px; border-radius: 9px; display: none; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid var(--terracotta); }
   .cart-badge.visible { display: flex; }
 
-  /* ── STAFF BAR ── */
   .staff-bar { background: var(--surface); border-bottom: 1px solid rgba(172,133,97,0.2); padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
   .staff-bar label { font-size: 13px; color: var(--text-mid); white-space: nowrap; }
   .staff-select { flex: 1; border: 1px solid rgba(172,133,97,0.4); border-radius: 8px; padding: 7px 10px; font-size: 14px; background: white; color: var(--text-dark); font-family: inherit; }
 
-  /* ── MAIN ── */
   .main { padding: 14px 12px; }
 
-  /* ── TILE GRID ── */
   .tile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .tile { background: white; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); cursor: pointer; min-height: 110px; position: relative; display: flex; flex-direction: column; justify-content: flex-end; transition: transform 0.15s; }
   .tile:active { transform: scale(0.97); }
@@ -76,7 +46,6 @@
   .tile-count { font-size: 11px; color: var(--text-mid); margin-top: 3px; }
   .tile-icon { font-size: 26px; margin-bottom: 4px; display: block; opacity: 0.7; }
 
-  /* ── PRODUCT LIST ── */
   .product-list { display: none; }
   .product-list.active { display: block; }
   .tile-grid-wrap.hidden { display: none; }
@@ -92,7 +61,6 @@
   .product-in-cart.visible { display: block; }
   .product-add-btn { background: var(--terracotta); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-  /* ── QTY MODAL (add to cart) ── */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(58,42,30,0.45); z-index: 200; align-items: flex-end; justify-content: center; }
   .modal-overlay.active { display: flex; }
   .modal { background: white; border-radius: 24px 24px 0 0; padding: 24px 20px 36px; width: 100%; max-width: 480px; box-shadow: 0 -8px 40px rgba(58,42,30,0.18); animation: slideUp 0.25s ease; }
@@ -105,7 +73,6 @@
   .add-to-cart-btn { width: 100%; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-family: inherit; background: var(--terracotta); color: white; cursor: pointer; margin-bottom: 10px; }
   .modal-cancel { width: 100%; border: 1px solid rgba(172,133,97,0.4); border-radius: 12px; padding: 12px; font-size: 14px; font-family: inherit; background: white; color: var(--text-mid); cursor: pointer; }
 
-  /* ── CART PANEL ── */
   .cart-overlay { display: none; position: fixed; inset: 0; background: rgba(58,42,30,0.45); z-index: 300; align-items: flex-end; justify-content: center; }
   .cart-overlay.active { display: flex; }
   .cart-panel { background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 480px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 -8px 40px rgba(58,42,30,0.18); animation: slideUp 0.25s ease; }
@@ -131,13 +98,11 @@
   .pay-card { background: var(--burgundy); color: white; }
   .cart-clear { width: 100%; border: 1px solid rgba(172,133,97,0.3); border-radius: 12px; padding: 11px; font-size: 13px; font-family: inherit; background: white; color: var(--text-mid); cursor: pointer; }
 
-  /* ── LOADING ── */
   .loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; gap: 16px; }
   .loading-moon { font-size: 48px; animation: pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.92)} }
   .loading-text { font-size: 14px; color: var(--text-mid); }
 
-  /* ── TOAST ── */
   .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text-dark); color: white; padding: 12px 24px; border-radius: 24px; font-size: 14px; z-index: 400; transition: transform 0.3s ease; white-space: nowrap; box-shadow: var(--shadow-lg); }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.success { background: #4a7c59; }
@@ -149,7 +114,6 @@
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
   <div class="header-left">
     <button class="back-btn" id="backBtn" onclick="goBack()">&#8592;</button>
@@ -164,7 +128,6 @@
   </button>
 </div>
 
-<!-- STAFF BAR -->
 <div class="staff-bar">
   <label>Staff:</label>
   <select class="staff-select" id="staffSelect">
@@ -172,7 +135,6 @@
   </select>
 </div>
 
-<!-- MAIN -->
 <div class="main">
   <div class="loading-screen" id="loadingScreen">
     <div class="loading-moon">🌙</div>
@@ -186,7 +148,6 @@
   </div>
 </div>
 
-<!-- ADD TO CART MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <div class="modal-product" id="modalProduct"></div>
@@ -201,7 +162,6 @@
   </div>
 </div>
 
-<!-- CART PANEL -->
 <div class="cart-overlay" id="cartOverlay">
   <div class="cart-panel">
     <div class="cart-header">
@@ -220,7 +180,6 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
@@ -239,7 +198,7 @@ let currentTile = null;
 let selectedProduct = null;
 let selectedTileName = null;
 let qty = 1;
-let cart = []; // [{name, sku, category, qty, imageURL}]
+let cart = [];
 
 window.addEventListener('load', function() {
   loadConfig();
@@ -354,7 +313,6 @@ function goBack() {
   currentTile = null;
 }
 
-// ── ADD TO CART MODAL ─────────────────────────────────────────
 function openModal(product, tileName) {
   selectedProduct = product;
   selectedTileName = tileName;
@@ -386,13 +344,11 @@ function addToCart() {
       sku: selectedProduct.sku || "",
       category: selectedTileName,
       qty: qty,
-      imageURL: selectedProduct.imageURL || "",
-      inventoryName: selectedProduct.inventoryName || ""
+      imageURL: selectedProduct.imageURL || ""
     });
   }
   updateCartBadge();
   closeModal();
-  // Refresh product list to show in-cart badge
   if (currentTile) renderProductList(currentTile);
   showToast("Added to cart — " + qty + "x " + selectedProduct.name, "success");
 }
@@ -405,7 +361,6 @@ function updateCartBadge() {
   else badge.classList.remove("visible");
 }
 
-// ── CART PANEL ────────────────────────────────────────────────
 function openCart() {
   renderCartPanel();
   document.getElementById("cartOverlay").classList.add("active");
@@ -465,54 +420,43 @@ function clearCart() {
   if (currentTile) renderProductList(currentTile);
 }
 
-// ── SUBMIT CART ───────────────────────────────────────────────
 function submitCart(paymentMethod) {
   const staff = document.getElementById("staffSelect").value;
-  if (!staff) {
-    showToast("Please select a staff member", "error");
-    return;
-  }
-  if (cart.length === 0) {
-    showToast("Cart is empty", "error");
-    return;
-  }
+  if (!staff) { showToast("Please select a staff member", "error"); return; }
+  if (cart.length === 0) { showToast("Cart is empty", "error"); return; }
 
   closeCart();
 
-  const timestamp = new Date().toISOString();
-  const promises = cart.map(item => {
-    const params = new URLSearchParams({
-      action: "logSale",
-      location: LOCATION,
-      staff: staff,
+  const payload = {
+    action: "logSale",
+    location: LOCATION,
+    staff: staff,
+    payment: paymentMethod,
+    dateStr: new Date().toLocaleDateString("en-AU"),
+    items: cart.map(item => ({
       product: item.name,
-      sku: item.sku,
-      category: item.category,
-      quantity: item.qty,
-      payment: paymentMethod,
-      timestamp: timestamp,
-      inventoryName: item.inventoryName || ""
-    });
-    return fetch(SCRIPT_URL + "?" + params.toString()).then(r => r.json());
-  });
+      sku: item.sku || "",
+      variant: item.category || "",
+      qty: item.qty
+    }))
+  };
 
-  Promise.all(promises)
-    .then(results => {
-      const errors = results.filter(r => r.error);
-      if (errors.length) {
-        showToast("Some items failed to save", "error");
-      } else {
+  fetch(SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload)))
+    .then(r => r.json())
+    .then(result => {
+      if (result.status === "success") {
         const total = cart.reduce((sum, item) => sum + item.qty, 0);
         showToast(total + " item" + (total !== 1 ? "s" : "") + " logged — " + paymentMethod, "success");
         cart = [];
         updateCartBadge();
         if (currentTile) renderProductList(currentTile);
+      } else {
+        showToast("Error: " + (result.message || "Unknown error"), "error");
       }
     })
     .catch(() => showToast("Could not reach spreadsheet", "error"));
 }
 
-// ── TOAST ─────────────────────────────────────────────────────
 function showToast(msg, type) {
   const t = document.getElementById("toast");
   t.textContent = msg;
