@@ -500,54 +500,44 @@ function clearCart() {
 // ── SUBMIT CART ───────────────────────────────────────────────
 function submitCart(paymentMethod) {
   const staff = document.getElementById("staffSelect").value;
-  if (!staff) {
-    showToast("Please select a staff member", "error");
-    return;
-  }
-  if (cart.length === 0) {
-    showToast("Cart is empty", "error");
-    return;
-  }
+  if (!staff) { showToast("Please select a staff member", "error"); return; }
+  if (cart.length === 0) { showToast("Cart is empty", "error"); return; }
 
-  closeCart();
-
-  const timestamp = new Date().toISOString();
   const show = document.getElementById("showSelect").value;
   if (!show) { showToast("Please select a show", "error"); return; }
 
-  const promises = cart.map(item => {
-    const params = new URLSearchParams({
-      action: "logSale",
-      location: LOCATION,
-      show: show,
-      staff: staff,
-      product: item.name,
-      sku: item.sku,
-      category: item.category,
-      quantity: item.qty,
-      payment: paymentMethod,
-      timestamp: timestamp,
-      inventoryName: item.inventoryName || ""
-    });
-    return fetch(SCRIPT_URL + "?" + params.toString()).then(r => r.json());
-  });
+  closeCart();
 
-  Promise.all(promises)
-    .then(results => {
-      const errors = results.filter(r => r.error);
-      if (errors.length) {
-        showToast("Some items failed to save", "error");
-      } else {
+  const payload = {
+    action: "logSale",
+    location: "Travel",
+    show: show,
+    staff: staff,
+    payment: paymentMethod,
+    dateStr: new Date().toLocaleDateString("en-AU"),
+    items: cart.map(item => ({
+      product: item.name,
+      sku: item.sku || "",
+      variant: item.category || "",
+      qty: item.qty
+    }))
+  };
+
+  fetch(SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload)))
+    .then(r => r.json())
+    .then(result => {
+      if (result.status === "success") {
         const total = cart.reduce((sum, item) => sum + item.qty, 0);
         showToast(total + " item" + (total !== 1 ? "s" : "") + " logged — " + paymentMethod, "success");
         cart = [];
         updateCartBadge();
         if (currentTile) renderProductList(currentTile);
+      } else {
+        showToast("Error: " + (result.message || "Unknown error"), "error");
       }
     })
     .catch(() => showToast("Could not reach spreadsheet", "error"));
 }
-
 // ── TOAST ─────────────────────────────────────────────────────
 function showToast(msg, type) {
   const t = document.getElementById("toast");
