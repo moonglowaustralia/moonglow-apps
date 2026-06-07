@@ -460,6 +460,13 @@ function submitCart(paymentMethod) {
   const show = document.getElementById("showSelect").value;
   if (!show) { showToast("Please select a show", "error"); return; }
 
+  // Disable payment buttons to prevent double submission
+  document.querySelectorAll('.pay-btn').forEach(btn => {
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+  });
+  showToast("Processing... please wait", "");
+
   closeCart();
 
   const payload = {
@@ -480,6 +487,7 @@ function submitCart(paymentMethod) {
   fetch(SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload)))
     .then(r => r.json())
     .then(result => {
+      document.querySelectorAll('.pay-btn').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
       if (result.status === "success") {
         const total = cart.reduce((sum, item) => sum + item.qty, 0);
         showToast(total + " item" + (total !== 1 ? "s" : "") + " logged — " + paymentMethod, "success");
@@ -490,7 +498,10 @@ function submitCart(paymentMethod) {
         showToast("Error: " + (result.message || "Unknown error"), "error");
       }
     })
-    .catch(() => showToast("Could not reach spreadsheet", "error"));
+    .catch(() => {
+      document.querySelectorAll('.pay-btn').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
+      showToast("Could not reach spreadsheet", "error");
+    });
 }
 
 function showToast(msg, type) {
