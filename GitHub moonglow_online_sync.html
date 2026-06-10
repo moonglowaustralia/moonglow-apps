@@ -420,7 +420,7 @@ async function submitToSheet() {
       orderNumber: item.orderNumber || '',
       productName: item.productName || '',
       sku: item.sku || '',
-      components: item.componentsStr || '',
+      components: (item.components || []).map(function(c){ return c.sku + (c.qty > 1 ? ' x' + c.qty : ''); }).join(', '),
       qty: item.qty || 1
     };
   });
