@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,490 +5,670 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Moonglow — Online Sales Sync</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500&display=swap');
-  :root {
-    --bg: #f8f2ed; --surface: #f2e4d9; --card: #fffaf6; --border: #e0d0c0;
-    --accent: #ad6639; --accent-light: rgba(173,102,57,0.08);
-    --text: #2c1e14; --muted: #9a8070;
-    --success: #5a7a52; --success-bg: #edf5eb;
-    --danger: #8d4b53; --danger-bg: #fdf0f1;
-    --warning: #8a6a2a; --warning-bg: #fdf6e3;
-  }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Jost', sans-serif; font-weight: 300; min-height: 100vh; }
-  .topbar { background: var(--text); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
-  .topbar-brand { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--surface); letter-spacing: 2px; text-transform: uppercase; }
-  .topbar-sub { font-size: 11px; color: #9a8070; letter-spacing: 1px; text-transform: uppercase; }
-  .main { max-width: 780px; margin: 0 auto; padding: 40px 24px 80px; }
-  .page-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 6px; }
-  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 36px; line-height: 1.6; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .card-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-  .card-desc { font-size: 12px; color: var(--muted); margin-bottom: 20px; line-height: 1.5; }
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
-  .field input, .field select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; border-radius: 8px; font-size: 14px; font-family: 'Jost', sans-serif; font-weight: 300; }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
-  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .token-saved { display: inline-flex; align-items: center; gap: 6px; background: var(--success-bg); color: var(--success); border: 1px solid #c3dbbf; border-radius: 20px; padding: 4px 12px; font-size: 11px; font-weight: 500; margin-bottom: 12px; }
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 8px; font-size: 13px; font-family: 'Jost', sans-serif; font-weight: 500; letter-spacing: 0.5px; cursor: pointer; border: none; transition: opacity 0.2s; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary { background: var(--accent); color: #fff; width: 100%; padding: 14px; font-size: 14px; }
-  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-  .btn-sm { padding: 8px 16px; font-size: 12px; }
-  .status { padding: 12px 16px; border-radius: 8px; font-size: 13px; line-height: 1.5; margin-bottom: 16px; display: none; }
-  .status.show { display: block; }
-  .status.success { background: var(--success-bg); color: var(--success); border: 1px solid #c3dbbf; }
-  .status.error { background: var(--danger-bg); color: var(--danger); border: 1px solid #f0c8cb; }
-  .status.info { background: var(--warning-bg); color: var(--warning); border: 1px solid #e8d5a3; }
-  .results-wrap { display: none; margin-top: 20px; }
-  .results-wrap.show { display: block; }
-  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .results-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; }
-  .results-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
-  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
-  .stat-num { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-  .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
-  .sales-table { width: 100%; border-collapse: collapse; font-size: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-  .sales-table th { background: var(--surface); padding: 10px 12px; text-align: left; font-weight: 500; font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); }
-  .sales-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
-  .sales-table tr:last-child td { border-bottom: none; }
-  .sales-table tr:hover td { background: var(--accent-light); }
-  .matched { color: var(--success); font-weight: 500; }
-  .unmatched { color: var(--danger); }
-  .qty-badge { background: var(--accent-light); color: var(--accent); border-radius: 4px; padding: 2px 7px; font-weight: 500; font-size: 12px; }
-  .components-cell { font-family: monospace; font-size: 10px; color: var(--muted); line-height: 1.6; }
-  .component-tag { display: inline-block; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; margin: 1px; font-size: 10px; }
-  .submit-section { display: none; margin-top: 20px; }
-  .submit-section.show { display: block; }
-  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f8f2ed;
+    color: #3a2a1a;
+    min-height: 100vh;
+  }
+
+  header {
+    background: #3a2a1a;
+    color: #f8f2ed;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  header span {
+    font-size: 13px;
+    opacity: 0.6;
+    margin-left: auto;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  .card h2 {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #8d6a4a;
+    margin-bottom: 16px;
+  }
+
+  .row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #8d6a4a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input[type="date"], input[type="text"] {
+    padding: 9px 12px;
+    border: 1.5px solid #e0d5cc;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #faf7f5;
+    color: #3a2a1a;
+    outline: none;
+  }
+
+  input:focus {
+    border-color: #ad6639;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.15s;
+    white-space: nowrap;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: #ad6639;
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: #8d4f28;
+  }
+
+  .btn-success {
+    background: #2e7d52;
+    color: white;
+  }
+
+  .btn-success:hover:not(:disabled) {
+    background: #1f5c3a;
+  }
+
+  .btn-outline {
+    background: white;
+    color: #ad6639;
+    border: 1.5px solid #ad6639;
+  }
+
+  .btn-outline:hover:not(:disabled) {
+    background: #fdf0e8;
+  }
+
+  .btn-done {
+    background: #2e7d52;
+    color: white;
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
+  .btn-done:hover:not(:disabled) {
+    background: #1f5c3a;
+  }
+
+  .btn-done.done-already {
+    background: #ccc;
+    cursor: default;
+  }
+
+  .status-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f0e8e0;
+  }
+
+  .toast {
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .toast-info { background: #e8f4fd; color: #1a5276; }
+  .toast-success { background: #e8f6ee; color: #1e6e3d; }
+  .toast-error { background: #fde8e8; color: #6e1e1e; }
+  .toast-warning { background: #fef6e8; color: #6e4a1e; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: #f2e4d9;
+  }
+
+  th {
+    padding: 9px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8d6a4a;
+    border-bottom: 2px solid #e0d5cc;
+  }
+
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0e8e0;
+    vertical-align: middle;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fdf8f5; }
+
+  .status-pending {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #fff3e0;
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .status-done {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #e8f6ee;
+    color: #1e6e3d;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #f2e4d9;
+    color: #8d4b53;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .not-found {
+    color: #c0392b;
+    font-weight: 600;
+  }
+
+  .summary-counts {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .count-box {
+    background: #f2e4d9;
+    border-radius: 8px;
+    padding: 12px 18px;
+    text-align: center;
+    min-width: 90px;
+  }
+
+  .count-box .num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ad6639;
+  }
+
+  .count-box .lbl {
+    font-size: 11px;
+    color: #8d6a4a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
   @keyframes spin { to { transform: rotate(360deg); } }
-  .progress-bar-wrap { background: var(--surface); border-radius: 4px; height: 6px; margin: 12px 0; overflow: hidden; display: none; }
-  .progress-bar-wrap.show { display: block; }
-  .progress-bar { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s; width: 0%; }
-  .progress-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .status-pending { color: var(--warning); font-weight: 500; }
-  .status-done { color: var(--success); font-weight: 500; }
-  .skip-note { font-size: 11px; color: var(--muted); font-style: italic; }
-  .unmatched-box { background: var(--danger-bg); border: 1px solid #f0c8cb; border-radius: 8px; padding: 14px; margin-top: 12px; display: none; }
-  .unmatched-box.show { display: block; }
-  .unmatched-box-title { font-size: 12px; font-weight: 500; color: var(--danger); margin-bottom: 8px; }
-  .footer-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 40px; line-height: 1.6; }
-  @media (max-width: 480px) {
-    .field-row { grid-template-columns: 1fr; }
-    .results-stats { grid-template-columns: repeat(2, 1fr); }
-    .topbar { padding: 14px 16px; }
-    .main { padding: 24px 16px 60px; }
+
+  .hidden { display: none; }
+
+  .orders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .row { flex-direction: column; }
+    .summary-counts { gap: 10px; }
   }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-brand">🌙 Moonglow</div>
-  <div class="topbar-sub">Online Sales Sync</div>
-</div>
+<header>
+  <h1>Moonglow — Online Sales Sync</h1>
+  <span id="headerStatus"></span>
+</header>
 
-<div class="main">
-  <h1 class="page-title">Online Sales Sync</h1>
-  <p class="page-sub">Pull sales from the Moonglow online store and log them to the spreadsheet. Review the parsed components, then submit as Pending. Mark Done in the spreadsheet to deduct HQ stock.</p>
+<div class="container">
 
-  <!-- SETTINGS -->
+  <!-- STEP 1: Fetch Orders -->
   <div class="card">
-    <div class="card-title">Settings</div>
-    <div class="card-desc">Your API token is saved in this browser only.</div>
-    <div id="tokenSavedBadge" class="token-saved" style="display:none">✓ API token saved</div>
-    <div class="field" id="tokenField">
-      <label>Shopify Admin API Token</label>
-      <input type="password" id="apiToken" placeholder="shpat_xxxxxxxxxxxxxxxxxxxx">
-      <div class="field-hint">Starts with shpat_ — saved in your browser only.</div>
+    <h2>Step 1 — Fetch Shopify Orders</h2>
+    <div class="row">
+      <div class="field">
+        <label>Start Date</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field">
+        <label>End Date</label>
+        <input type="date" id="endDate">
+      </div>
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="syncedBy" placeholder="e.g. Madi" style="width:140px">
+      </div>
+      <button class="btn btn-primary" id="fetchBtn" onclick="fetchOrders()">Fetch Orders</button>
     </div>
-    <div style="display:flex;gap:10px;margin-top:4px">
-      <button class="btn btn-secondary btn-sm" onclick="saveToken()">Save Token</button>
-      <button class="btn btn-sm" style="background:var(--danger-bg);color:var(--danger);border:1px solid #f0c8cb" onclick="clearToken()">Clear</button>
-    </div>
+    <div id="fetchStatus" class="status-bar hidden"></div>
   </div>
 
-  <!-- SYNC CARD -->
-  <div class="card">
-    <div class="card-title">Pull Sales from Shopify</div>
-    <div class="card-desc">Select date range. SKUs will be parsed using the + * ! rules and components shown for review before submitting.</div>
-    <div class="field-row">
-      <div class="field"><label>From Date</label><input type="date" id="dateFrom"></div>
-      <div class="field"><label>To Date</label><input type="date" id="dateTo"></div>
+  <!-- STEP 2: Preview & Submit -->
+  <div class="card hidden" id="previewCard">
+    <div class="orders-header">
+      <h2>Step 2 — Preview &amp; Submit</h2>
+      <div class="summary-counts" id="summaryCounts"></div>
     </div>
-    <div class="field">
-      <label>Your Name (Synced By)</label>
-      <input type="text" id="syncedBy" placeholder="e.g. Madi" value="Madi">
-    </div>
-    <div class="field">
-      <label>Google Apps Script URL</label>
-      <input type="text" id="scriptUrl" value="https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec">
-    </div>
-    <div id="fetchStatus" class="status"></div>
-    <div class="progress-label" id="progressLabel" style="display:none"></div>
-    <div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
-    <button class="btn btn-primary" id="fetchBtn" onclick="fetchSales()">Fetch Sales from Shopify</button>
-  </div>
 
-  <!-- RESULTS -->
-  <div class="results-wrap" id="resultsWrap">
-    <div class="results-header">
-      <div class="results-title">Sales Preview</div>
-      <button class="btn btn-secondary btn-sm" onclick="clearResults()">Clear</button>
-    </div>
-    <div class="results-stats">
-      <div class="stat-box"><div class="stat-num" id="statOrders">0</div><div class="stat-label">Orders</div></div>
-      <div class="stat-box"><div class="stat-num" id="statItems">0</div><div class="stat-label">Line Items</div></div>
-      <div class="stat-box"><div class="stat-num" id="statMatched">0</div><div class="stat-label">Parsed</div></div>
-      <div class="stat-box"><div class="stat-num" id="statSkipped">0</div><div class="stat-label">Skipped</div></div>
-    </div>
-    <div style="overflow-x:auto">
-      <table class="sales-table" id="salesTable">
+    <div style="overflow-x:auto;">
+      <table id="previewTable">
         <thead>
           <tr>
+            <th>Date</th>
             <th>Order</th>
             <th>Product</th>
             <th>SKU Raw</th>
-            <th>Components to Deduct</th>
+            <th>Components</th>
             <th>Qty</th>
+            <th>Already in sheet?</th>
+          </tr>
+        </thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" id="submitBtn" onclick="submitPending()">Submit All as Pending</button>
+      <span id="submitStatus"></span>
+    </div>
+  </div>
+
+  <!-- STEP 3: Mark Done -->
+  <div class="card hidden" id="doneCard">
+    <div class="orders-header">
+      <h2>Step 3 — Mark Done &amp; Deduct from HQ Stock</h2>
+      <button class="btn btn-success" id="markAllBtn" onclick="markAllDone()">Mark All Pending Done</button>
+    </div>
+
+    <div style="overflow-x:auto;">
+      <table id="doneTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Order</th>
+            <th>Product</th>
+            <th>Components</th>
+            <th>Qty</th>
+            <th>Status</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="salesTableBody"></tbody>
+        <tbody id="doneBody"></tbody>
       </table>
     </div>
-    <div class="unmatched-box" id="unmatchedBox">
-      <div class="unmatched-box-title">SKUs with no components parsed — will be logged but stock won't deduct:</div>
-      <div id="unmatchedList" style="font-size:11px;color:var(--danger);line-height:1.8"></div>
-    </div>
+
+    <div id="doneStatus" class="status-bar hidden"></div>
   </div>
 
-  <!-- SUBMIT -->
-  <div class="submit-section" id="submitSection">
-    <hr class="divider">
-    <div id="submitStatus" class="status"></div>
-    <button class="btn btn-primary" id="submitBtn" onclick="submitToSheet()">
-      Submit to Spreadsheet as Pending
-    </button>
-    <p style="font-size:11px;color:var(--muted);margin-top:10px;text-align:center">
-      Logs all items to "Sales from Shopify" tab as Pending. Change status to Done in the spreadsheet to deduct HQ stock. Change to Cancelled to ignore.
-    </p>
-  </div>
-
-  <p class="footer-note">
-    Moonglow Online Sales Sync — pulls from moonglowaustralia.myshopify.com<br>
-    Token stored in browser localStorage only. Never transmitted to third parties.
-  </p>
 </div>
 
 <script>
-var SHOP = "moonglowaustralia.myshopify.com";
-var salesData = [];
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzWZ_pYCfxewfml6rOg5R21yJFXaDoCNtQ61J_uVbUjHtafWd3OIWBgycFLtFAK6z1r/exec";
 
-// SKUs to skip entirely (no stock impact)
-var SKIP_SKUS = ['ENGRAVING', 'Gift Bag-Cream', 'CRD-BDAY', 'LRP-5-A5', 'ROUND DISH', 'NC-STAR-YG'];
+let fetchedRows = [];
+let submittedRows = [];
+// rowIndex is the 1-based sheet row assigned after submit
 
-// ── Init ──────────────────────────────────────────────────────
-window.onload = function() {
-  var today = new Date();
-  var yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
-  document.getElementById('dateTo').value = formatDate(today);
-  document.getElementById('dateFrom').value = formatDate(yesterday);
+// ============================================================
+// FETCH ORDERS
+// ============================================================
 
-  var saved = localStorage.getItem('mg_shopify_token');
-  if (saved) {
-    document.getElementById('apiToken').value = saved;
-    document.getElementById('tokenSavedBadge').style.display = 'inline-flex';
-    document.getElementById('tokenField').style.display = 'none';
-  }
-  var savedUrl = localStorage.getItem('mg_script_url');
-  if (savedUrl) document.getElementById('scriptUrl').value = savedUrl;
-  var savedName = localStorage.getItem('mg_synced_by');
-  if (savedName) document.getElementById('syncedBy').value = savedName;
-};
+async function fetchOrders() {
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
 
-function formatDate(d) { return d.toISOString().split('T')[0]; }
-
-function saveToken() {
-  var t = document.getElementById('apiToken').value.trim();
-  if (!t) { showStatus('fetchStatus', 'Please enter your API token.', 'error'); return; }
-  localStorage.setItem('mg_shopify_token', t);
-  document.getElementById('tokenSavedBadge').style.display = 'inline-flex';
-  document.getElementById('tokenField').style.display = 'none';
-  showStatus('fetchStatus', 'Token saved.', 'success');
-}
-
-function clearToken() {
-  localStorage.removeItem('mg_shopify_token');
-  document.getElementById('apiToken').value = '';
-  document.getElementById('tokenSavedBadge').style.display = 'none';
-  document.getElementById('tokenField').style.display = 'block';
-}
-
-// ── SKU Parser ────────────────────────────────────────────────
-// Rules (applied in order):
-// 1. Split on ! first — ignore everything after !
-// 2. If * in remaining SKU — it is ONE combined RM product SKU, match directly
-// 3. If + in remaining SKU — MULTIPLE components, deduct each separately
-// 4. Simple SKU — deduct directly
-function parseShopifySKU(sku, qty) {
-  if (!sku || sku.trim() === '') return [];
-
-  var trimmed = sku.trim();
-
-  // Skip non-stock SKUs
-  for (var i = 0; i < SKIP_SKUS.length; i++) {
-    if (trimmed.toUpperCase() === SKIP_SKUS[i].toUpperCase()) return [];
+  if (!startDate || !endDate) {
+    showStatus("fetchStatus", "Enter both start and end date.", "error");
+    return;
   }
 
-  // Step 1: Strip everything after ! (moondrop fulfillment note)
-  var mainPart = trimmed.split('!')[0].trim();
-
-  // Step 2: If * present — entire remaining string is ONE RM product SKU
-  if (mainPart.indexOf('*') >= 0) {
-    return [{ sku: mainPart, qty: qty }];
-  }
-
-  // Step 3: If + present — split into multiple components
-  if (mainPart.indexOf('+') >= 0) {
-    var parts = mainPart.split('+').map(function(s) { return s.trim(); }).filter(Boolean);
-    var components = [];
-    parts.forEach(function(part) {
-      // Check for X2 X3 multiplier
-      var xMatch = part.match(/^(.+?)\s+X(\d+)$/i);
-      if (xMatch) {
-        components.push({ sku: xMatch[1].trim(), qty: qty * parseInt(xMatch[2]) });
-      } else {
-        components.push({ sku: part, qty: qty });
-      }
-    });
-    return components;
-  }
-
-  // Step 4: Simple SKU
-  return [{ sku: mainPart, qty: qty }];
-}
-
-// ── Fetch Sales ───────────────────────────────────────────────
-async function fetchSales() {
-  var token = localStorage.getItem('mg_shopify_token') || document.getElementById('apiToken').value.trim();
-  if (!token) { showStatus('fetchStatus', 'Please save your API token first.', 'error'); return; }
-
-  var from = document.getElementById('dateFrom').value;
-  var to = document.getElementById('dateTo').value;
-  if (!from || !to) { showStatus('fetchStatus', 'Please select a date range.', 'error'); return; }
-
-  var scriptUrl = document.getElementById('scriptUrl').value.trim();
-  localStorage.setItem('mg_script_url', scriptUrl);
-  localStorage.setItem('mg_synced_by', document.getElementById('syncedBy').value.trim());
-
-  var btn = document.getElementById('fetchBtn');
-  btn.innerHTML = '<span class="spinner"></span> Fetching from Shopify...';
+  const btn = document.getElementById("fetchBtn");
   btn.disabled = true;
-  clearResults();
-  showStatus('fetchStatus', 'Connecting to Shopify...', 'info');
-  setProgress(10, 'Fetching orders...');
+  btn.innerHTML = '<span class="spinner"></span>Fetching...';
+  showStatus("fetchStatus", "Connecting to Shopify...", "info");
 
   try {
-    var payload = {
-      action: 'fetchShopifyOrders',
-      shop: SHOP,
-      token: token,
-      dateFrom: from + 'T00:00:00+10:00',
-      dateTo: to + 'T23:59:59+10:00'
-    };
+    const url = GAS_URL + "?action=fetchShopifyOrders&startDate=" + startDate + "&endDate=" + endDate;
+    const res = await fetch(url);
+    const data = await res.json();
 
-    setProgress(30, 'Loading orders...');
-    var getUrl = scriptUrl + '?data=' + encodeURIComponent(JSON.stringify(payload));
-
-    var response = await new Promise(function(resolve, reject) {
-      var xhr = new XMLHttpRequest();
-      xhr.open('GET', getUrl, true);
-      xhr.onload = function() {
-        try { resolve(JSON.parse(xhr.responseText)); }
-        catch(e) { reject(new Error('Could not parse response')); }
-      };
-      xhr.onerror = function() { reject(new Error('Network error')); };
-      xhr.send();
-    });
-
-    setProgress(80, 'Parsing SKUs...');
-
-    if (response.status !== 'success') throw new Error(response.message || 'Failed to fetch');
-
-    // Parse SKUs client-side for preview
-    var rawItems = response.items || [];
-    salesData = rawItems.map(function(item) {
-      var components = parseShopifySKU(item.sku, item.qty);
-      return Object.assign({}, item, { components: components, skip: components.length === 0 && item.sku });
-    });
-
-    setProgress(100, 'Done');
-    setTimeout(function() {
-      document.getElementById('progressWrap').classList.remove('show');
-      document.getElementById('progressLabel').style.display = 'none';
-    }, 800);
-
-    renderResults(salesData, response.orderCount || 0);
-    showStatus('fetchStatus', 'Fetched ' + (response.orderCount || 0) + ' orders with ' + salesData.length + ' line items.', 'success');
-
-  } catch(err) {
-    showStatus('fetchStatus', 'Error: ' + err.message, 'error');
-    document.getElementById('progressWrap').classList.remove('show');
-    document.getElementById('progressLabel').style.display = 'none';
-  }
-
-  btn.innerHTML = 'Fetch Sales from Shopify';
-  btn.disabled = false;
-}
-
-// ── Render Results ────────────────────────────────────────────
-function renderResults(items, orderCount) {
-  var tbody = document.getElementById('salesTableBody');
-  tbody.innerHTML = '';
-
-  var matched = 0, skipped = 0, unmatched = [];
-
-  items.forEach(function(item) {
-    var tr = document.createElement('tr');
-    var components = item.components || [];
-
-    var componentHtml = '';
-    if (components.length === 0) {
-      if (!item.sku || SKIP_SKUS.indexOf(item.sku.toUpperCase()) >= 0) {
-        componentHtml = '<span class="skip-note">No stock impact</span>';
-        skipped++;
-      } else {
-        componentHtml = '<span class="unmatched">No components parsed</span>';
-        if (item.sku && unmatched.indexOf(item.sku) < 0) unmatched.push(item.sku);
-      }
-    } else {
-      matched++;
-      componentHtml = components.map(function(c) {
-        return '<span class="component-tag">' + c.sku + (c.qty > 1 ? ' ×' + c.qty : '') + '</span>';
-      }).join(' ');
+    if (data.error) {
+      showStatus("fetchStatus", "Error: " + data.error, "error");
+      return;
     }
 
-    var date = item.date ? item.date.substring(0, 10) : '';
-    var actionHtml = components.length > 0
-      ? '<span class="status-pending">Will log as Pending</span>'
-      : '<span class="skip-note">Log only</span>';
+    fetchedRows = data.rows || [];
+    showStatus("fetchStatus", "Fetched " + fetchedRows.length + " line items from Shopify.", "success");
+    renderPreview();
 
+  } catch (err) {
+    showStatus("fetchStatus", "Network error: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Fetch Orders";
+  }
+}
+
+// ============================================================
+// RENDER PREVIEW TABLE
+// ============================================================
+
+function renderPreview() {
+  if (fetchedRows.length === 0) {
+    document.getElementById("previewCard").classList.add("hidden");
+    return;
+  }
+
+  const tbody = document.getElementById("previewBody");
+  tbody.innerHTML = "";
+
+  let newCount = 0;
+  let dupCount = 0;
+
+  fetchedRows.forEach(function(row, idx) {
+    const isDup = row.duplicate || false;
+    if (isDup) dupCount++; else newCount++;
+
+    const tr = document.createElement("tr");
     tr.innerHTML =
-      '<td style="color:var(--muted);font-size:11px;white-space:nowrap">' + (item.orderNumber || '') + '<br>' + date + '</td>' +
-      '<td style="font-size:12px">' + (item.productName || '') + '</td>' +
-      '<td style="font-family:monospace;font-size:10px;color:var(--muted)">' + (item.sku || '—') + '</td>' +
-      '<td class="components-cell">' + componentHtml + '</td>' +
-      '<td><span class="qty-badge">' + item.qty + '</span></td>' +
-      '<td style="font-size:11px">' + actionHtml + '</td>';
+      "<td>" + (row.date || "") + "</td>" +
+      "<td>" + (row.orderNumber || "") + "</td>" +
+      "<td>" + (row.productName || "") + "</td>" +
+      "<td style='font-size:11px;color:#666'>" + (row.skuRaw || "") + "</td>" +
+      "<td><strong>" + (row.components || "") + "</strong></td>" +
+      "<td>" + (row.qty || 1) + "</td>" +
+      "<td>" + (isDup ? '<span class="badge">In sheet</span>' : "—") + "</td>";
     tbody.appendChild(tr);
   });
 
-  document.getElementById('statOrders').textContent = orderCount;
-  document.getElementById('statItems').textContent = items.length;
-  document.getElementById('statMatched').textContent = matched;
-  document.getElementById('statSkipped').textContent = skipped;
+  // Summary counts
+  document.getElementById("summaryCounts").innerHTML =
+    '<div class="count-box"><div class="num">' + fetchedRows.length + '</div><div class="lbl">Total</div></div>' +
+    '<div class="count-box"><div class="num">' + newCount + '</div><div class="lbl">New</div></div>' +
+    '<div class="count-box"><div class="num">' + dupCount + '</div><div class="lbl">Already in sheet</div></div>';
 
-  document.getElementById('resultsWrap').classList.add('show');
-
-  if (unmatched.length > 0) {
-    document.getElementById('unmatchedList').innerHTML = unmatched.join('<br>');
-    document.getElementById('unmatchedBox').classList.add('show');
-  }
-
-  if (items.length > 0) document.getElementById('submitSection').classList.add('show');
+  document.getElementById("previewCard").classList.remove("hidden");
+  document.getElementById("doneCard").classList.add("hidden");
 }
 
-// ── Submit to Sheet ───────────────────────────────────────────
-// Sends items in batches of 10 to avoid URL length limits
-async function submitToSheet() {
-  if (!salesData.length) return;
-  var scriptUrl = document.getElementById('scriptUrl').value.trim();
-  var syncedBy = document.getElementById('syncedBy').value.trim() || 'Madi';
+// ============================================================
+// SUBMIT AS PENDING
+// ============================================================
 
-  var btn = document.getElementById('submitBtn');
+async function submitPending() {
+  const syncedBy = document.getElementById("syncedBy").value.trim() || "Unknown";
+  const btn = document.getElementById("submitBtn");
+
+  if (fetchedRows.length === 0) {
+    showInline("submitStatus", "Nothing to submit.", "warning");
+    return;
+  }
+
   btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting...';
+  showInline("submitStatus", "", "");
 
-  var itemsToLog = salesData.map(function(item) {
-    return {
-      date: item.date ? item.date.substring(0, 10) : new Date().toLocaleDateString(),
-      orderNumber: item.orderNumber || '',
-      productName: item.productName || '',
-      sku: item.sku || '',
-      components: (item.components || []).map(function(c){ return c.sku + (c.qty > 1 ? ' x' + c.qty : ''); }).join(', '),
-      qty: item.qty || 1
-    };
+  const rowsWithSyncedBy = fetchedRows.map(function(r) {
+    return Object.assign({}, r, { syncedBy: syncedBy });
   });
 
-  // Send in batches of 10
-  var batchSize = 10;
-  var batches = [];
-  for (var i = 0; i < itemsToLog.length; i += batchSize) {
-    batches.push(itemsToLog.slice(i, i + batchSize));
-  }
+  try {
+    const url = GAS_URL + "?action=submitShopifySync&payload=" + encodeURIComponent(JSON.stringify(rowsWithSyncedBy));
+    const res = await fetch(url);
+    const data = await res.json();
 
-  var totalLogged = 0;
-  var errors = [];
-
-  for (var b = 0; b < batches.length; b++) {
-    btn.innerHTML = '<span class="spinner"></span> Logging batch ' + (b+1) + ' of ' + batches.length + '...';
-    var batch = batches[b];
-    var payloadStr = JSON.stringify({ items: batch, syncedBy: syncedBy });
-    var url = scriptUrl + '?action=logShopifySales&payload=' + encodeURIComponent(payloadStr);
-
-    try {
-      var result = await new Promise(function(resolve) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.onload = function() {
-          try { resolve(JSON.parse(xhr.responseText)); }
-          catch(e) { resolve({ success: true, logged: batch.length }); }
-        };
-        xhr.onerror = function() { resolve({ success: true, logged: batch.length }); };
-        xhr.send();
-      });
-      if (result.error) errors.push(result.error);
-      else totalLogged += result.logged || batch.length;
-    } catch(err) {
-      errors.push(err.message);
+    if (data.error) {
+      showInline("submitStatus", "Error: " + data.error, "error");
+      return;
     }
-  }
 
-  if (errors.length > 0) {
-    showStatus('submitStatus', 'Some batches failed: ' + errors.join('; '), 'error');
-    btn.innerHTML = 'Submit to Spreadsheet as Pending';
+    showInline("submitStatus",
+      "Added " + data.added + " rows. Skipped " + data.skipped + " duplicates.",
+      "success");
+
+    submittedRows = rowsWithSyncedBy;
+    await loadPendingRows();
+
+  } catch (err) {
+    showInline("submitStatus", "Network error: " + err.message, "error");
+  } finally {
     btn.disabled = false;
-  } else {
-    showStatus('submitStatus', 'Done! ' + totalLogged + ' items logged to "Sales from Shopify" tab as Pending. Review in spreadsheet and mark Done to deduct HQ stock.', 'success');
-    btn.innerHTML = '✓ Submitted Successfully';
+    btn.innerHTML = "Submit All as Pending";
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────
-function clearResults() {
-  salesData = [];
-  document.getElementById('resultsWrap').classList.remove('show');
-  document.getElementById('submitSection').classList.remove('show');
-  document.getElementById('unmatchedBox').classList.remove('show');
-  document.getElementById('salesTableBody').innerHTML = '';
-  document.getElementById('submitStatus').className = 'status';
+// ============================================================
+// LOAD PENDING ROWS INTO DONE TABLE
+// ============================================================
+
+async function loadPendingRows() {
+  // Re-fetch HQ stock and Shopify Sales to render the done table
+  // We build the done table from submittedRows for now, assigning row numbers
+  // The GAS knows the actual row numbers on the sheet
+
+  const tbody = document.getElementById("doneBody");
+  tbody.innerHTML = "";
+
+  submittedRows.forEach(function(row, idx) {
+    const tr = document.createElement("tr");
+    tr.id = "doneRow_" + idx;
+    tr.innerHTML =
+      "<td>" + (row.date || "") + "</td>" +
+      "<td>" + (row.orderNumber || "") + "</td>" +
+      "<td>" + (row.productName || "") + "</td>" +
+      "<td><strong>" + (row.components || "") + "</strong></td>" +
+      "<td>" + (row.qty || 1) + "</td>" +
+      "<td id='rowStatus_" + idx + "'><span class='status-pending'>Pending</span></td>" +
+      "<td><button class='btn btn-done' id='doneBtn_" + idx + "' onclick='markOneDone(" + idx + ")'>Done</button></td>";
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("doneCard").classList.remove("hidden");
+  document.getElementById("doneStatus").classList.add("hidden");
 }
 
-function showStatus(id, msg, type) {
-  var el = document.getElementById(id);
-  el.textContent = msg; el.className = 'status show ' + type;
+// ============================================================
+// MARK ONE ROW DONE
+// Uses orderNumber + skuRaw to identify the row on the sheet
+// ============================================================
+
+async function markOneDone(idx) {
+  const row = submittedRows[idx];
+  if (!row) return;
+
+  const btn = document.getElementById("doneBtn_" + idx);
+  if (btn) { btn.disabled = true; btn.innerHTML = "..."; }
+
+  try {
+    const url = GAS_URL + "?action=markOneDone" +
+      "&orderNumber=" + encodeURIComponent(row.orderNumber) +
+      "&skuRaw=" + encodeURIComponent(row.skuRaw);
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.error) {
+      if (btn) { btn.disabled = false; btn.innerHTML = "Done"; }
+      showStatus("doneStatus", "Error on row " + (idx+1) + ": " + data.error, "error");
+      return;
+    }
+
+    document.getElementById("rowStatus_" + idx).innerHTML = "<span class='status-done'>Done</span>";
+    if (btn) { btn.className = "btn btn-done done-already"; btn.innerHTML = "Done"; btn.disabled = true; }
+
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.innerHTML = "Done"; }
+    showStatus("doneStatus", "Network error: " + err.message, "error");
+  }
 }
 
-function setProgress(pct, label) {
-  document.getElementById('progressWrap').classList.add('show');
-  document.getElementById('progressLabel').style.display = 'block';
-  document.getElementById('progressLabel').textContent = label;
-  document.getElementById('progressBar').style.width = pct + '%';
+// ============================================================
+// MARK ALL DONE
+// ============================================================
+
+async function markAllDone() {
+  const btn = document.getElementById("markAllBtn");
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Processing...';
+  showStatus("doneStatus", "Marking all pending rows as done and deducting from HQ Stock...", "info");
+
+  try {
+    const url = GAS_URL + "?action=markAllDone";
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.error) {
+      showStatus("doneStatus", "Error: " + data.error, "error");
+      return;
+    }
+
+    // Update all pending rows in the UI
+    submittedRows.forEach(function(row, idx) {
+      const statusEl = document.getElementById("rowStatus_" + idx);
+      const btnEl = document.getElementById("doneBtn_" + idx);
+      if (statusEl) statusEl.innerHTML = "<span class='status-done'>Done</span>";
+      if (btnEl) { btnEl.className = "btn btn-done done-already"; btnEl.innerHTML = "Done"; btnEl.disabled = true; }
+    });
+
+    let msg = "Processed " + data.processed + " rows.";
+    if (data.errors && data.errors.length > 0) {
+      msg += " Warnings: " + data.errors.join(", ");
+      showStatus("doneStatus", msg, "warning");
+    } else {
+      showStatus("doneStatus", msg + " HQ Stock updated.", "success");
+    }
+
+  } catch (err) {
+    showStatus("doneStatus", "Network error: " + err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = "Mark All Pending Done";
+  }
 }
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function showStatus(elId, msg, type) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!msg) { el.classList.add("hidden"); return; }
+  el.className = "status-bar toast toast-" + type;
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+
+function showInline(elId, msg, type) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!msg) { el.className = ""; el.textContent = ""; return; }
+  el.className = "toast toast-" + type;
+  el.textContent = msg;
+}
+
+// Set default date range to last 7 days
+(function() {
+  const today = new Date();
+  const week = new Date(today);
+  week.setDate(week.getDate() - 7);
+  document.getElementById("endDate").value = today.toISOString().substring(0, 10);
+  document.getElementById("startDate").value = week.toISOString().substring(0, 10);
+})();
 </script>
+
 </body>
 </html>
