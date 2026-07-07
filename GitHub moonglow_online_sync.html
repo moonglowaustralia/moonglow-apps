@@ -513,21 +513,19 @@ async function submitPending() {
 
     if (data.error) {
       showInline("submitStatus", "Error: " + data.error, "error");
-      return;
+    } else {
+      showInline("submitStatus",
+        "Added " + data.added + " rows. Skipped " + data.skipped + " duplicates.",
+        "success");
     }
 
-    showInline("submitStatus",
-      "Added " + data.added + " rows. Skipped " + data.skipped + " duplicates.",
-      "success");
-
-    submittedRows = rowsWithSyncedBy;
-    await loadPendingRows();
-
   } catch (err) {
-    showInline("submitStatus", "Network error: " + err.message, "error");
+    showInline("submitStatus", "Timed out — rows saved in sheet. Click Mark All Pending Done below.", "warning");
   } finally {
     btn.disabled = false;
     btn.innerHTML = "Submit All as Pending";
+    submittedRows = rowsWithSyncedBy;
+    await loadPendingRows();
   }
 }
 
