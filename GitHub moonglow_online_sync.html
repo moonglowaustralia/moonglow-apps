@@ -507,8 +507,12 @@ async function submitPending() {
   });
 
   try {
-    const url = GAS_URL + "?action=submitShopifySync&payload=" + encodeURIComponent(JSON.stringify(rowsWithSyncedBy));
-    const res = await fetch(url);
+    const url = GAS_URL + "?action=submitShopifySync";
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify(rowsWithSyncedBy)
+    });
     const data = await res.json();
 
     if (data.error) {
